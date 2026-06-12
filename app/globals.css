@@ -736,6 +736,96 @@ kbd {
   line-height: 1.5;
 }
 
+/* ============ rich segments (tables & code render live while editing) ===== */
+
+.sy-rich {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sy-seg {
+  position: relative;
+}
+.sy-seg-x {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  z-index: 2;
+  font-size: 9px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 5px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.sy-seg:hover .sy-seg-x {
+  opacity: 1;
+}
+.sy-seg-x:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.sy-codeseg {
+  background: #f4f4f0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 10px 8px;
+}
+.sy-codeseg-lang {
+  display: block;
+  width: 90px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9.5px;
+  color: var(--muted);
+  text-transform: lowercase;
+  margin-bottom: 3px;
+}
+.sy-codeseg textarea {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11.5px;
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.sy-tableseg table {
+  border-collapse: collapse;
+}
+.sy-tableseg td {
+  border: 1px solid var(--line);
+  padding: 0;
+  background: var(--card);
+}
+.sy-tableseg td input {
+  width: 96px;
+  padding: 4px 7px;
+  font-size: 11.5px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-geist-mono), monospace;
+}
+.sy-tableseg td input.sy-th {
+  font-weight: 600;
+  background: var(--paper);
+}
+.sy-tableseg .sy-table-tools {
+  margin-top: 5px;
+}
+
 /* ============ context menu ============ */
 
 .sy-menu-back {

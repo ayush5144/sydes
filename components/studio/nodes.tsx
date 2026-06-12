@@ -13,6 +13,7 @@ import { MdView } from "../../lib/markdown";
 import type { BoxData, LayerData, NoteData, TableData } from "../../lib/types";
 import { ExpandContext } from "./expand-context";
 import { MdArea } from "./MdArea";
+import { RichMd } from "./RichMd";
 
 function Ports({ nodeId }: { nodeId: string }) {
   // right-clicking a connection dot opens the node menu (with disconnect)
@@ -108,7 +109,7 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
       <Grip />
       <Dots id={id} />
       {selected ? (
-        <MdArea
+        <RichMd
           className="sy-note-text"
           value={data.text}
           placeholder={"jot here…  /  for blocks"}
@@ -130,7 +131,7 @@ export function TextNode({ id, data, selected }: NodeProps<Node<NoteData, "text"
       <Grip />
       <Dots id={id} />
       {selected ? (
-        <MdArea
+        <RichMd
           className="sy-text-area"
           value={data.text}
           placeholder={"write…  /  for blocks"}
