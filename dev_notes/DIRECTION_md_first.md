@@ -1,6 +1,14 @@
-# sydes v2 — pure markdown (the locked direction)
+# sydes v2 — markdown FORMAT, canvas EXPERIENCE (corrected 12 June, late)
 
-*Decided 12 June 2026. No canvas. The .md file is the app.*
+**Correction after using the block editor:** Ayush wants the canvas
+*experience* (unbounded workspace, palette, drag, connect, components that
+look like their preview) with markdown as the *format*. The page-style block
+editor boxed things in — wrong. Current model: the workspace is the editor;
+the saved/downloaded .md = readable markdown + workspace data in an html
+comment (lossless reopen). DocEditor code is parked, not deleted.
+
+*(Original pure-md plan below, kept for history — blocks/flow sections are
+superseded by the correction above.)*
 
 ## What sydes is now
 
