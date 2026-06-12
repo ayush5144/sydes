@@ -25,19 +25,36 @@
 - [x] Smoother connecting: loose connection mode + 55px snap radius +
       always-faintly-visible handles
 
-## Phase 1 — polish (next)
+## Phase 1 — pages & blocks (the notes direction)
 
-- [ ] Starter templates (layered web app · pipeline · data model)
-- [ ] Cmd+D duplicate node
-- [ ] Undo/redo (React Flow history)
-- [ ] Multi-select alignment helpers (align lefts / distribute)
-- [ ] Export: option to include a Mermaid block alongside ascii
-- [ ] Drawn-label fallback: when a label can't be placed in the ascii,
-      list it under Connections instead of dropping it
-- [ ] Mobile: read-only viewer at minimum
+sydes = canvases AND pages. A doc is either a canvas (diagram) or a page
+(Notion-style notes). Every canvas node can also open its own page.
 
-## Phase 2 — maybe (only if it earns it)
+- [ ] Page doc type: full-width block editor (new → canvas | page)
+- [ ] Block editor, markdown under the hood — no heavy editor framework:
+      paragraph · h1/h2/h3 · bullet/numbered · todo · code block (with
+      language) · quote · divider · simple table
+- [ ] Slash commands (`/code`, `/h2`, `/todo`, …) to insert blocks
+- [ ] Node pages: open any box/note/table into its page (side panel);
+      export as `### <node>` sections under the diagram
+- [ ] Page export = clean md; canvas export unchanged
 
+## Phase 2 — speed & flow
+
+- [ ] Live md split view in the studio (the doc writes itself as you edit)
+- [ ] ⌘K palette: commands + search across all docs/pages
+- [ ] Tidy button: snap boxes into clean rows/columns
+- [ ] Templates on new canvas (layered app · pipeline · data model · blank)
+- [ ] Undo/redo, Cmd+D duplicate
+
+## Phase 3 — files
+
+- [ ] Save-to-folder (File System Access API): write the exported md
+      straight into a repo's dev_notes/
+- [ ] Export whole workspace as a zip of md files
+
+## Deferred (only if it earns it)
+
+- [ ] BYOK AI assist (describe → draft diagram; critique architecture)
 - [ ] MD import (parse an existing ARCHITECTURE.md into nodes)
 - [ ] Shareable links (URL-compressed diagram)
-- [ ] Deploy to Vercel + domain
