@@ -29,6 +29,7 @@ import {
   saveDiagram,
 } from "../../lib/storage";
 import type { DiagramDoc, DiagramMeta, Direction } from "../../lib/types";
+import { ContextMenu, type MenuState } from "./ContextMenu";
 import { ExportModal } from "./ExportModal";
 import { BoxNode, LayerNode, NoteNode, TableNode } from "./nodes";
 import { Palette } from "./Palette";
@@ -55,6 +56,8 @@ function StudioInner() {
   const [exportMd, setExportMd] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [overTrash, setOverTrash] = useState(false);
+  const [menu, setMenu] = useState<MenuState | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { screenToFlowPosition, getViewport, addNodes } = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
@@ -196,6 +199,23 @@ function StudioInner() {
     openDoc(fresh);
   };
 
+  const duplicateNode = (id: string) => {
+    const n = nodes.find((x) => x.id === id);
+    if (!n) return;
+    addNodes({
+      ...n,
+      id: `${n.type}-${uid()}`,
+      position: { x: n.position.x + 32, y: n.position.y + 32 },
+      selected: false,
+      data: JSON.parse(JSON.stringify(n.data)),
+    });
+  };
+
+  const deleteNode = (id: string) => {
+    setNodes((ns) => ns.filter((n) => n.id !== id));
+    setEdges((es) => es.filter((e) => e.source !== id && e.target !== id));
+  };
+
   if (!ready) return <div className="sy-loading">sydes…</div>;
 
   return (
@@ -260,6 +280,19 @@ function StudioInner() {
             setDragging(false);
             setOverTrash(false);
           }}
+          onNodeContextMenu={(e, node) => {
+            e.preventDefault();
+            setMenu({ kind: "node", id: node.id, x: e.clientX, y: e.clientY });
+          }}
+          onEdgeContextMenu={(e, edge) => {
+            e.preventDefault();
+            setMenu({ kind: "edge", id: edge.id, hasLabel: !!edge.label, x: e.clientX, y: e.clientY });
+          }}
+          onPaneContextMenu={(e) => {
+            e.preventDefault();
+            const me = e as MouseEvent;
+            setMenu({ kind: "pane", x: me.clientX, y: me.clientY });
+          }}
           snapToGrid
           snapGrid={[8, 8]}
           fitView
@@ -286,6 +319,38 @@ function StudioInner() {
           <div ref={trashRef} className={`sy-trash ${overTrash ? "sy-trash-hot" : ""}`}>
             ⌫ delete
           </div>
+        )}
+        {!dragging && (
+          <button className="sy-help-btn" onClick={() => setHelpOpen((v) => !v)}>
+            ?
+          </button>
+        )}
+        {helpOpen && (
+          <div className="sy-help">
+            <div className="sy-help-row"><span>add</span><span>drag from palette · double-click canvas · right-click</span></div>
+            <div className="sy-help-row"><span>connect</span><span>drag from a node&apos;s edge to another node</span></div>
+            <div className="sy-help-row"><span>disconnect</span><span>right-click the arrow · drag its end away</span></div>
+            <div className="sy-help-row"><span>label arrow</span><span>double-click the arrow</span></div>
+            <div className="sy-help-row"><span>extend flow</span><span>select a box, press <kbd>tab</kbd></span></div>
+            <div className="sy-help-row"><span>blocks in notes</span><span>type <kbd>/</kbd> — heading, code, todo…</span></div>
+            <div className="sy-help-row"><span>delete</span><span>right-click · select + <kbd>⌫</kbd> · drag to corner</span></div>
+          </div>
+        )}
+        {menu && (
+          <ContextMenu
+            menu={menu}
+            onClose={() => setMenu(null)}
+            onDuplicate={duplicateNode}
+            onDeleteNode={deleteNode}
+            onDisconnect={(id) => setEdges((es) => es.filter((e) => e.id !== id))}
+            onClearLabel={(id) =>
+              setEdges((es) => es.map((e) => (e.id === id ? { ...e, label: undefined } : e)))
+            }
+            onAddHere={(kind, x, y) => {
+              const pos = screenToFlowPosition({ x, y });
+              addAt(kind, { x: pos.x - 90, y: pos.y - 20 });
+            }}
+          />
         )}
       </div>
       {exportMd !== null && (

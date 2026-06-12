@@ -81,12 +81,13 @@ export function starterDiagram(): DiagramDoc {
   };
 }
 
-export function blankDiagram(name = "untitled system"): DiagramDoc {
+export function blankDiagram(name = "untitled"): DiagramDoc {
+  // notes-first: a new canvas starts as a place to write, not a structure
   return {
     id: `d-${uid()}`,
     name,
     direction: "v",
-    nodes: [makeNode("box", { x: 280, y: 160 })],
+    nodes: [makeNode("note", { x: 280, y: 140 })],
     edges: [],
     updatedAt: Date.now(),
   };

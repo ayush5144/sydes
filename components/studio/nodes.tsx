@@ -9,6 +9,7 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import type { BoxData, LayerData, NoteData, TableData } from "../../lib/types";
+import { MdArea } from "./MdArea";
 
 function Ports() {
   return (
@@ -52,13 +53,11 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
   const { updateNodeData } = useReactFlow();
   return (
     <div className={`sy-node sy-note ${selected ? "sy-sel" : ""}`}>
-      <textarea
-        className="nodrag sy-note-text"
+      <MdArea
+        className="sy-note-text"
         value={data.text}
-        placeholder="a note…"
-        spellCheck={false}
-        rows={Math.max(2, data.text.split("\n").length)}
-        onChange={(e) => updateNodeData(id, { text: e.target.value })}
+        placeholder={"jot here…  /  for blocks"}
+        onChange={(v) => updateNodeData(id, { text: v })}
       />
       <Ports />
     </div>
@@ -107,12 +106,24 @@ export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "tab
           ))}
         </tbody>
       </table>
+      {(data.note !== undefined && (selected || data.note)) && (
+        <MdArea
+          className="sy-table-note"
+          value={data.note ?? ""}
+          placeholder={"note for this table…  /  for blocks"}
+          minRows={1}
+          onChange={(v) => updateNodeData(id, { note: v })}
+        />
+      )}
       {selected && (
         <div className="sy-table-tools nodrag">
           <button onClick={addRow}>+row</button>
           <button onClick={addCol}>+col</button>
           <button onClick={delRow}>−row</button>
           <button onClick={delCol}>−col</button>
+          {data.note === undefined && (
+            <button onClick={() => updateNodeData(id, { note: "" })}>+note</button>
+          )}
         </div>
       )}
       <Ports />

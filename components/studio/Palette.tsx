@@ -28,9 +28,7 @@ export function Palette({ onAdd }: { onAdd: (kind: NodeKind) => void }) {
           <span>{it.name}</span>
         </button>
       ))}
-      <div className="sy-palette-tip">
-        drag in · <kbd>tab</kbd> extends · <kbd>⌫</kbd> deletes
-      </div>
+      <div className="sy-palette-tip">drag onto the canvas</div>
     </aside>
   );
 }

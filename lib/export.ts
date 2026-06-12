@@ -305,7 +305,7 @@ export function toMarkdown(doc: DiagramDoc): string {
     parts.push(`## Layers`, lines.join("\n"));
   }
 
-  // tables
+  // tables (with their attached notes)
   const tables = nodes.filter((n) => n.type === "table");
   for (const t of tables) {
     const d = t.data as TableData;
@@ -317,17 +317,15 @@ export function toMarkdown(doc: DiagramDoc): string {
       ...d.rows.slice(1).map((r) => `| ${r.map(mdCell).join(" | ")} |`),
     ].join("\n");
     parts.push(`## ${(d.title || "table").trim() || "table"}`, md);
+    if (d.note?.trim()) parts.push(d.note.trim());
   }
 
-  // notes
-  const notes = nodes.filter((n) => n.type === "note");
-  if (notes.length) {
-    const lines = notes
-      .map((n) => (n.data as NoteData).text.trim())
-      .filter(Boolean)
-      .map((t) => `- ${t.split("\n").join("\n  ")}`);
-    if (lines.length) parts.push(`## Notes`, lines.join("\n"));
-  }
+  // notes — verbatim: they're markdown already (slash blocks, code, headings)
+  const noteTexts = nodes
+    .filter((n) => n.type === "note")
+    .map((n) => (n.data as NoteData).text.trim())
+    .filter(Boolean);
+  if (noteTexts.length) parts.push(`## Notes`, noteTexts.join("\n\n---\n\n"));
 
   return parts.join("\n\n") + "\n";
 }

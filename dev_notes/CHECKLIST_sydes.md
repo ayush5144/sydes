@@ -23,7 +23,16 @@
 - [x] Clean build, both routes static
 - [x] Drag-to-delete drop zone (appears while dragging a node)
 - [x] Smoother connecting: loose connection mode + 55px snap radius +
-      always-faintly-visible handles
+      always-faintly-visible handles + invisible handle padding
+- [x] Disconnect: drag edge end away · ✕ on selected edge · right-click
+- [x] Right-click menus: node (duplicate/delete) · edge (remove label/
+      disconnect) · canvas (add box/note/table/layer)
+- [x] Slash commands in notes (/h2 /code /todo /quote /divider /table)
+      via shared MdArea component
+- [x] Table notes: +note on a selected table, exports under the table
+- [x] Notes export verbatim (they are markdown)
+- [x] Notes-first: new canvas starts with a note, not a box
+- [x] ? help card, action-first wording; double-click canvas adds a box
 
 ## Phase 1 — pages & blocks (the notes direction)
 

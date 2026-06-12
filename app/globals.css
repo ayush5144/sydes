@@ -567,6 +567,144 @@ kbd {
   border-bottom: 1px solid var(--line);
 }
 
+/* ============ slash menu (notes) ============ */
+
+.sy-mdarea {
+  position: relative;
+}
+
+.sy-slash {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  z-index: 30;
+  min-width: 190px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(20, 20, 16, 0.1);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.sy-slash button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  padding: 6px 9px;
+  border-radius: 4px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  color: var(--ink);
+}
+.sy-slash button:hover {
+  background: var(--paper);
+  color: var(--accent);
+}
+.sy-slash-key {
+  color: var(--muted);
+  font-size: 10.5px;
+  width: 58px;
+}
+.sy-slash kbd {
+  margin-left: auto;
+}
+
+.sy-table-note {
+  margin-top: 6px;
+  border-top: 1px dashed var(--line);
+  padding-top: 6px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+/* ============ context menu ============ */
+
+.sy-menu-back {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.sy-menu {
+  position: fixed;
+  z-index: 41;
+  min-width: 150px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(20, 20, 16, 0.1);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12.5px;
+}
+.sy-menu button {
+  text-align: left;
+  padding: 7px 11px;
+  border-radius: 4px;
+}
+.sy-menu button:hover {
+  background: var(--paper);
+}
+.sy-menu button.sy-danger:hover {
+  background: #fbe9e3;
+  color: var(--accent);
+}
+
+/* ============ help ============ */
+
+.sy-help-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 14px;
+  color: var(--muted);
+}
+.sy-help-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.sy-help {
+  position: absolute;
+  bottom: 62px;
+  right: 20px;
+  z-index: 10;
+  width: 360px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(20, 20, 16, 0.08);
+  padding: 12px 14px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11.5px;
+}
+.sy-help-row {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+}
+.sy-help-row span:first-child {
+  width: 110px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.sy-help-row span:last-child {
+  color: var(--muted);
+}
+
 /* ============ trash drop zone ============ */
 
 .sy-trash {
