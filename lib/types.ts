@@ -7,21 +7,13 @@ export type LayerData = { title: string };
 
 export type Direction = "v" | "h";
 
-export type FileKind = "md" | "canvas";
-
-/** One sydes file. kind "md" uses content; kind "canvas" uses nodes/edges. */
-export type SydesFile = {
+export type DiagramDoc = {
   id: string;
   name: string;
-  kind: FileKind;
+  direction: Direction;
+  nodes: Node[];
+  edges: Edge[];
   updatedAt: number;
-  content?: string;
-  direction?: Direction;
-  nodes?: Node[];
-  edges?: Edge[];
 };
 
-/** Legacy alias — canvas files predate the md-first pivot. */
-export type DiagramDoc = SydesFile;
-
-export type DiagramMeta = { id: string; name: string; kind?: FileKind; updatedAt: number };
+export type DiagramMeta = { id: string; name: string; updatedAt: number };

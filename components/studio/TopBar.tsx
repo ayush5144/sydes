@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import type { DiagramMeta, Direction, FileKind } from "../../lib/types";
+import type { DiagramMeta, Direction } from "../../lib/types";
 
 export function TopBar(props: {
   name: string;
   onName: (v: string) => void;
-  kind: FileKind;
   diagrams: DiagramMeta[];
   currentId: string;
   onSwitch: (id: string) => void;
@@ -55,7 +54,6 @@ export function TopBar(props: {
                   setOpen(false);
                 }}
               >
-                <span className="sy-file-glyph">{d.kind === "canvas" ? "▦" : "¶"}</span>
                 {d.name || "untitled"}
               </button>
             ))}
@@ -85,24 +83,22 @@ export function TopBar(props: {
         {props.saved ? "saved" : "…"}
       </span>
       <div className="sy-spacer" />
-      {props.kind === "canvas" && (
-        <div className="sy-dir" title="flow direction — where tab places the next box">
-          <button
-            className={props.direction === "v" ? "sy-on" : ""}
-            onClick={() => props.onDirection("v")}
-          >
-            ↓
-          </button>
-          <button
-            className={props.direction === "h" ? "sy-on" : ""}
-            onClick={() => props.onDirection("h")}
-          >
-            →
-          </button>
-        </div>
-      )}
+      <div className="sy-dir" title="flow direction — where tab places the next box">
+        <button
+          className={props.direction === "v" ? "sy-on" : ""}
+          onClick={() => props.onDirection("v")}
+        >
+          ↓
+        </button>
+        <button
+          className={props.direction === "h" ? "sy-on" : ""}
+          onClick={() => props.onDirection("h")}
+        >
+          →
+        </button>
+      </div>
       <button className="sy-export" onClick={props.onExport}>
-        copy / download
+        export md
       </button>
     </header>
   );

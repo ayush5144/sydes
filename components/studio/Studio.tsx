@@ -29,9 +29,8 @@ import {
   loadDiagram,
   saveDiagram,
 } from "../../lib/storage";
-import type { DiagramMeta, Direction, FileKind, SydesFile } from "../../lib/types";
+import type { DiagramDoc, DiagramMeta, Direction } from "../../lib/types";
 import { ContextMenu, type MenuState } from "./ContextMenu";
-import { DocEditor } from "./DocEditor";
 import { ExpandModal } from "./ExpandModal";
 import { ExpandContext } from "./expand-context";
 import { ExportModal } from "./ExportModal";
@@ -61,8 +60,6 @@ function StudioInner() {
   const [ready, setReady] = useState(false);
   const [currentId, setCurrentId] = useState("");
   const [name, setName] = useState("");
-  const [kind, setKind] = useState<FileKind>("md");
-  const [content, setContent] = useState("");
   const [direction, setDirection] = useState<Direction>("v");
   const [diagrams, setDiagrams] = useState<DiagramMeta[]>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -89,36 +86,24 @@ function StudioInner() {
   };
 
   const currentDoc = useCallback(
-    (): SydesFile =>
-      kind === "md"
-        ? { id: currentId, name, kind, content, updatedAt: Date.now() }
-        : { id: currentId, name, kind, direction, nodes, edges, updatedAt: Date.now() },
-    [currentId, name, kind, content, direction, nodes, edges]
+    (): DiagramDoc => ({
+      id: currentId,
+      name,
+      direction,
+      nodes,
+      edges,
+      updatedAt: Date.now(),
+    }),
+    [currentId, name, direction, nodes, edges]
   );
 
   const openDoc = useCallback(
-    (docIn: SydesFile) => {
-      let doc = docIn;
-      // one experience: the unbounded workspace. md is the FORMAT, not the
-      // editor. files that were converted to md get their workspace back
-      // from the stored nodes; pure-md files open as a text element.
-      if (doc.kind === "md") {
-        if (doc.nodes?.length) {
-          doc = { ...doc, kind: "canvas" };
-        } else {
-          const t = makeNode("text", { x: 160, y: 96 });
-          t.data = { text: (doc.content ?? "").trim() || `# ${doc.name}` };
-          doc = { ...doc, kind: "canvas", direction: "v", nodes: [t], edges: [] };
-        }
-        saveDiagram(doc);
-      }
+    (doc: DiagramDoc) => {
       setCurrentId(doc.id);
       setName(doc.name);
-      setKind(doc.kind);
-      setContent(doc.content ?? "");
       setDirection(doc.direction ?? "v");
-      setNodes(doc.nodes ?? []);
-      setEdges(doc.edges ?? []);
+      setNodes(doc.nodes);
+      setEdges(doc.edges);
       setDiagrams(listDiagrams());
     },
     [setNodes, setEdges]
@@ -222,8 +207,8 @@ function StudioInner() {
     openDoc(doc);
   };
 
-  const importDoc = (doc: SydesFile) => {
-    const fresh = { ...doc, id: `d-${uid()}`, kind: doc.kind ?? "canvas" };
+  const importDoc = (doc: DiagramDoc) => {
+    const fresh = { ...doc, id: `d-${uid()}` };
     saveDiagram(fresh);
     openDoc(fresh);
   };
@@ -263,7 +248,6 @@ function StudioInner() {
       <TopBar
         name={name}
         onName={setName}
-        kind={kind}
         diagrams={diagrams}
         currentId={currentId}
         onSwitch={switchTo}
@@ -271,17 +255,9 @@ function StudioInner() {
         onDelete={removeDiagram}
         direction={direction}
         onDirection={setDirection}
-        onExport={() =>
-          setExportMd(kind === "md" ? content || "\n" : toMarkdown(currentDoc()))
-        }
+        onExport={() => setExportMd(toMarkdown(currentDoc()))}
         saved={saved}
       />
-      {kind === "md" && (
-        <div className="sy-docwrap">
-          <DocEditor content={content} onChange={setContent} />
-        </div>
-      )}
-      {kind === "canvas" && (
       <div
         className="sy-body"
         ref={wrapRef}
@@ -423,11 +399,10 @@ function StudioInner() {
           />
         )}
       </div>
-      )}
       {exportMd !== null && (
         <ExportModal
           md={exportMd}
-          file={currentDoc()}
+          doc={currentDoc()}
           onClose={() => setExportMd(null)}
           onImport={importDoc}
         />

@@ -38,18 +38,6 @@ export function MdView({ md, className }: { md: string; className?: string }) {
       continue;
     }
 
-    // html comment — sydes metadata, invisible in any renderer
-    if (t.startsWith("<!--")) {
-      while (i < lines.length && !lines[i].includes("-->")) i++;
-      i++;
-      out.push(
-        <div key={k++} className="sy-md-meta" title="sydes data (hidden in the saved file)">
-          ⌁
-        </div>
-      );
-      continue;
-    }
-
     // ``` code fence
     if (t.startsWith("```")) {
       const lang = t.slice(3).trim();

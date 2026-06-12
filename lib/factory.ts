@@ -76,7 +76,6 @@ export function starterDiagram(): DiagramDoc {
   return {
     id: `d-${uid()}`,
     name: "untitled system",
-    kind: "canvas",
     direction: "v",
     nodes,
     edges,
@@ -85,16 +84,12 @@ export function starterDiagram(): DiagramDoc {
 }
 
 export function blankDiagram(name = "untitled"): DiagramDoc {
-  // uniform start: every file opens with a heading, notion-style —
-  // a text element at the top of an unbounded workspace
-  const title = makeNode("text", { x: 160, y: 96 });
-  title.data = { text: `# ${name}` };
+  // notes-first: a new canvas opens ready to type into
   return {
     id: `d-${uid()}`,
     name,
-    kind: "canvas",
     direction: "v",
-    nodes: [{ ...title, selected: true }],
+    nodes: [{ ...makeNode("note", { x: 280, y: 140 }), selected: true }],
     edges: [],
     updatedAt: Date.now(),
   };

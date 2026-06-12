@@ -34,9 +34,9 @@ export default function Home() {
             in plain sight.
           </h1>
           <p>
-            a block-based markdown studio — notes, todos, code, tables, and
-            system diagrams, all in plain .md files you own. no export step:
-            what you write is the file.
+            a visual studio for system design — drag boxes, connect flows, group
+            layers, sketch tables and notes. then export the whole thing as clean
+            markdown with hand-crafted ascii diagrams.
           </p>
           <div className="ld-cta">
             <Link href="/studio" className="ld-btn">
@@ -52,24 +52,24 @@ export default function Home() {
 
       <section className="ld-features">
         <div>
-          <h3>write in blocks</h3>
+          <h3>think on a canvas</h3>
           <p>
-            everything renders — headings, code, todos, tables. click a block to
-            edit it raw, type / to insert, drag ⋮⋮ to reorder.
+            boxes, notes, tables, layers. vertical stacks or horizontal pipelines —
+            connect anything to anything, label every arrow.
           </p>
         </div>
         <div>
-          <h3>files are plain markdown</h3>
+          <h3>export real markdown</h3>
           <p>
-            no export gap, no lock-in. every file reads perfectly on github, in
-            any editor, forever — diagrams included, as unicode box art.
+            one click turns your canvas into an ARCHITECTURE.md — unicode box
+            diagrams, markdown tables, notes. readable in any editor, forever.
           </p>
         </div>
         <div>
           <h3>nothing to set up</h3>
           <p>
-            files live in your browser. back up and restore anytime. no accounts,
-            no servers, no settings page.
+            diagrams live in localStorage. back up and restore as json. no accounts,
+            no servers, no lock-in.
           </p>
         </div>
       </section>
