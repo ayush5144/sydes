@@ -53,8 +53,9 @@ export function ContextMenu({
           item("disconnect", () => onDisconnect(menu.id!), true),
         ]}
         {menu.kind === "pane" && [
-          item("add box", () => onAddHere("box", menu.x, menu.y)),
           item("add note", () => onAddHere("note", menu.x, menu.y)),
+          item("add text", () => onAddHere("text", menu.x, menu.y)),
+          item("add box", () => onAddHere("box", menu.x, menu.y)),
           item("add table", () => onAddHere("table", menu.x, menu.y)),
           item("add layer", () => onAddHere("layer", menu.x, menu.y)),
         ]}

@@ -40,8 +40,8 @@ export function TopBar(props: {
           spellCheck={false}
           onChange={(e) => props.onName(e.target.value)}
         />
-        <button className="sy-doc-toggle" onClick={() => setOpen((v) => !v)}>
-          ▾
+        <button className="sy-doc-toggle" title="your files" onClick={() => setOpen((v) => !v)}>
+          files ▾
         </button>
         {open && (
           <div className="sy-doc-menu">

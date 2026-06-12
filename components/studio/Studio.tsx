@@ -31,12 +31,18 @@ import {
 import type { DiagramDoc, DiagramMeta, Direction } from "../../lib/types";
 import { ContextMenu, type MenuState } from "./ContextMenu";
 import { ExportModal } from "./ExportModal";
-import { BoxNode, LayerNode, NoteNode, TableNode } from "./nodes";
+import { BoxNode, LayerNode, NoteNode, TableNode, TextNode } from "./nodes";
 import { Palette } from "./Palette";
 import { TopBar } from "./TopBar";
 import { WireEdge } from "./WireEdge";
 
-const nodeTypes = { box: BoxNode, note: NoteNode, table: TableNode, layer: LayerNode };
+const nodeTypes = {
+  box: BoxNode,
+  note: NoteNode,
+  text: TextNode,
+  table: TableNode,
+  layer: LayerNode,
+};
 const edgeTypes = { wire: WireEdge };
 const defaultEdgeOptions = {
   type: "wire",
@@ -123,10 +129,11 @@ function StudioInner() {
 
   const addAt = useCallback(
     (kind: NodeKind, pos: { x: number; y: number }) => {
-      const node = makeNode(kind, pos);
-      addNodes(node);
+      // select the new node so its editor focuses and typing starts instantly
+      const node = { ...makeNode(kind, pos), selected: true };
+      setNodes((ns) => ns.map((n) => ({ ...n, selected: false })).concat(node));
     },
-    [addNodes]
+    [setNodes]
   );
 
   const addFromPalette = useCallback(
@@ -328,6 +335,7 @@ function StudioInner() {
         {helpOpen && (
           <div className="sy-help">
             <div className="sy-help-row"><span>add</span><span>drag from palette · double-click canvas · right-click</span></div>
+            <div className="sy-help-row"><span>minimize table</span><span>▾ next to its title; double-click to expand</span></div>
             <div className="sy-help-row"><span>connect</span><span>drag from a node&apos;s edge to another node</span></div>
             <div className="sy-help-row"><span>disconnect</span><span>right-click the arrow · drag its end away</span></div>
             <div className="sy-help-row"><span>label arrow</span><span>double-click the arrow</span></div>

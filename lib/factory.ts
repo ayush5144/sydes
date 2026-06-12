@@ -3,7 +3,7 @@ import type { DiagramDoc } from "./types";
 
 export const uid = () => crypto.randomUUID().slice(0, 8);
 
-export type NodeKind = "box" | "note" | "table" | "layer";
+export type NodeKind = "box" | "note" | "text" | "table" | "layer";
 
 export function makeNode(kind: NodeKind, position: { x: number; y: number }): Node {
   const id = `${kind}-${uid()}`;
@@ -12,6 +12,8 @@ export function makeNode(kind: NodeKind, position: { x: number; y: number }): No
       return { id, type: "box", position, data: { title: "", lines: "" } };
     case "note":
       return { id, type: "note", position, data: { text: "" } };
+    case "text":
+      return { id, type: "text", position, data: { text: "" } };
     case "table":
       return {
         id,
@@ -82,12 +84,12 @@ export function starterDiagram(): DiagramDoc {
 }
 
 export function blankDiagram(name = "untitled"): DiagramDoc {
-  // notes-first: a new canvas starts as a place to write, not a structure
+  // notes-first: a new canvas opens ready to type into
   return {
     id: `d-${uid()}`,
     name,
     direction: "v",
-    nodes: [makeNode("note", { x: 280, y: 140 })],
+    nodes: [{ ...makeNode("note", { x: 280, y: 140 }), selected: true }],
     edges: [],
     updatedAt: Date.now(),
   };

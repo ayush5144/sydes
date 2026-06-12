@@ -234,10 +234,15 @@ kbd {
 
 .sy-doc-toggle {
   color: var(--muted);
-  padding: 4px;
+  padding: 4px 9px;
+  margin-left: 4px;
+  font-size: 11.5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
 }
 .sy-doc-toggle:hover {
   color: var(--ink);
+  border-color: var(--wire);
 }
 
 .sy-doc-menu {
@@ -403,7 +408,8 @@ kbd {
 }
 
 .sy-node input,
-.sy-node textarea {
+.sy-node textarea,
+.sy-textnode textarea {
   display: block;
   width: 100%;
   border: none;
@@ -412,6 +418,7 @@ kbd {
   color: inherit;
   resize: none;
   outline: none;
+  overflow: hidden; /* content grows, never scrolls */
 }
 
 .sy-box {
@@ -453,8 +460,57 @@ kbd {
   font-size: 12px;
 }
 
+/* plain text on the canvas — no card, just words */
+.sy-textnode {
+  min-width: 220px;
+  max-width: 460px;
+  padding: 6px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 3px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+}
+.sy-textnode:hover {
+  border-color: var(--line);
+}
+.sy-textnode.sy-sel {
+  border-color: var(--accent);
+}
+.sy-text-area {
+  line-height: 1.6;
+  color: var(--ink);
+}
+.sy-text-area::placeholder {
+  color: #c4c3bb;
+}
+
 .sy-table {
   padding: 8px 10px 9px;
+}
+.sy-table-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.sy-collapse {
+  color: var(--muted);
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.sy-collapse:hover {
+  color: var(--accent);
+}
+.sy-table-mini {
+  margin-top: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--paper);
+  border: 1px dashed var(--line);
+  border-radius: 3px;
+  cursor: pointer;
 }
 .sy-table table {
   margin-top: 6px;
@@ -632,11 +688,11 @@ kbd {
 .sy-menu {
   position: fixed;
   z-index: 41;
-  min-width: 150px;
+  min-width: 160px;
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 1px solid #c9c8c0;
   border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(20, 20, 16, 0.1);
+  box-shadow: 0 10px 30px rgba(20, 20, 16, 0.16);
   padding: 4px;
   display: flex;
   flex-direction: column;
@@ -682,27 +738,32 @@ kbd {
   bottom: 62px;
   right: 20px;
   z-index: 10;
-  width: 360px;
+  width: 400px;
   background: var(--card);
-  border: 1px solid var(--line);
+  border: 1px solid #c9c8c0;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(20, 20, 16, 0.08);
-  padding: 12px 14px;
+  box-shadow: 0 10px 30px rgba(20, 20, 16, 0.14);
+  padding: 8px 16px;
   font-family: var(--font-geist-mono), monospace;
   font-size: 11.5px;
 }
 .sy-help-row {
-  display: flex;
-  gap: 12px;
-  padding: 4px 0;
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  column-gap: 16px;
+  padding: 8px 0;
+  align-items: baseline;
+}
+.sy-help-row + .sy-help-row {
+  border-top: 1px dashed var(--line);
 }
 .sy-help-row span:first-child {
-  width: 110px;
-  flex-shrink: 0;
   font-weight: 600;
+  color: var(--accent);
 }
 .sy-help-row span:last-child {
   color: var(--muted);
+  line-height: 1.55;
 }
 
 /* ============ trash drop zone ============ */

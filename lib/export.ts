@@ -248,6 +248,10 @@ function nodeName(n: Node): string {
   if (n.type === "box" || n.type === "layer")
     return ((n.data as BoxData | LayerData).title || "untitled").trim() || "untitled";
   if (n.type === "table") return ((n.data as TableData).title || "table").trim() || "table";
+  if (n.type === "text") {
+    const first = (n.data as NoteData).text.split("\n")[0].replace(/^#+\s*/, "").trim();
+    return first || "text";
+  }
   return "note";
 }
 
@@ -279,6 +283,14 @@ export function toMarkdown(doc: DiagramDoc): string {
     });
     parts.push(`## Connections`, "```\n" + lines.join("\n") + "\n```");
   }
+
+  // text sections — verbatim markdown, in top-to-bottom canvas order
+  const texts = nodes
+    .filter((n) => n.type === "text")
+    .sort((a, b) => a.position.y - b.position.y)
+    .map((n) => (n.data as NoteData).text.trim())
+    .filter(Boolean);
+  parts.push(...texts);
 
   // layers: list the boxes geometrically inside each layer rect
   const layers = nodes.filter((n) => n.type === "layer");

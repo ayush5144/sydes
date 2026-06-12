@@ -3,8 +3,9 @@
 import type { NodeKind } from "../../lib/factory";
 
 const ITEMS: { kind: NodeKind; name: string; hint: string; glyph: string }[] = [
+  { kind: "note", name: "note", hint: "a card for jotting", glyph: "✎" },
+  { kind: "text", name: "text", hint: "plain text, no card", glyph: "¶" },
   { kind: "box", name: "box", hint: "a component", glyph: "▭" },
-  { kind: "note", name: "note", hint: "freeform text", glyph: "✎" },
   { kind: "table", name: "table", hint: "rows & columns", glyph: "▦" },
   { kind: "layer", name: "layer", hint: "group things", glyph: "▢" },
 ];
