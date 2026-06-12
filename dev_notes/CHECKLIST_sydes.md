@@ -54,6 +54,19 @@
 - [x] All textareas auto-grow (no inner scrolling); new components spawn
       selected + focused
 - [x] MIT LICENSE; Vercel-ready (static, zero config)
+- [x] Dot menu: right-click a connection dot → connect (click target) ·
+      disconnect; node menu gains move + disconnect
+- [x] Fix: caret no longer jumps while typing (editor keeps local value;
+      React Flow's async data round-trip was resetting the cursor)
+- [x] Fix: React Flow error #008 freeze — all four dots are source-type
+      handles so edges started from any side resolve in loose mode
+- [x] Enter continues lists/todos/quotes; empty item exits the list
+- [x] RichMd hybrid editor in notes/text: /table → real editable grid
+      inline, /code → real code block with language field, while editing;
+      markdown string stays the single source of truth (lossless ↔)
+- [x] −row/−col only remove an empty row/column (all table surfaces)
+- [x] Full view for notes/text = one editable RichMd surface (preview
+      pane removed)
 
 Direction note: the md-first / pages-and-blocks experiment (block document
 editor) was tried and rolled back — sydes stays a canvas studio that exports

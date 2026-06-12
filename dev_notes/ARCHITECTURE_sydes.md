@@ -69,11 +69,21 @@ exist; the `files ▾` menu switches, creates, deletes.
   table notes, box details) is the same component, so behavior is identical:
   it auto-grows (content never scrolls inside a card) and focuses itself the
   moment the component is created — you type immediately, never hunt for a
-  cursor.
-- **Two faces per note/text.** Selected = raw markdown editing. Deselected =
-  rendered view: real headings, code blocks with language tags, working
-  checkboxes look, bordered tables, quotes, lists. You always see either the
-  truth (raw) or the result (rendered), never a half-WYSIWYG.
+  cursor. The editor holds its own local value, so the caret never jumps
+  while node data round-trips through React Flow.
+- **Hybrid editing in notes/text (RichMd).** While editing, prose stays raw
+  markdown — but **tables and code blocks render as real interactive
+  widgets inline**: an editable grid (cells, +row/+col) and a styled code
+  block with a language field. The markdown string stays the single source
+  of truth: segments are parsed from it and serialized back losslessly on
+  every edit. Text areas interleave the widgets so there's always somewhere
+  to type; each widget has a hover ✕ to remove the block.
+- **Two faces per note/text.** Selected = the hybrid editor above.
+  Deselected = fully rendered view: real headings, code blocks with language
+  tags, checkboxes, bordered tables, quotes, lists.
+- **Safe table ops.** `−row` / `−col` only remove the last row/column when
+  every cell in it is empty — everywhere tables exist (canvas component,
+  full view, inline widgets). No accidental data loss.
 - **Slash commands** (type `/` at the start of a line):
 
 | Command | Inserts |
@@ -130,7 +140,9 @@ selected and focused — typing starts instantly.
 **Connecting:**
 - Drag from any connection dot to another card — loose mode + a 55px magnetic
   radius means near-misses snap on; dots have invisible padding so precision
-  isn't needed.
+  isn't needed. (All four dots are source-type handles: in loose mode React
+  Flow only resolves an edge's source among source handles, so this is what
+  makes drags started from any side produce valid edges.)
 - Or right-click a dot → "connect — click a node" → click the target (hint bar
   shows; esc or empty-canvas click cancels).
 - Label an arrow by double-clicking it; ✕ on a selected label disconnects.
@@ -156,10 +168,10 @@ arrow and press ⌫.
   out of the tray onto the canvas to place it. It disappears when nothing is
   stale.
 
-**Full view:** ⋯ or right-click → expand. Notes/text open as editor + live
-rendered preview side by side; tables open as a large editable grid with
-tools; boxes open big title + details. Same data — close and the card
-reflects everything.
+**Full view:** ⋯ or right-click → expand. Notes/text open as one wide
+editable surface (the same hybrid editor — live table/code widgets, no
+duplicate preview); tables open as a large editable grid with tools; boxes
+open big title + details. Same data — close and the card reflects everything.
 
 **Saving:** every change autosaves (debounced 600ms) to localStorage;
 the TopBar shows `saved` / `…`. `files ▾` lists all diagrams (most recent
@@ -205,7 +217,8 @@ Output doc shape: `# name` → date line → `## System diagram` → `## Connect
 | `app/studio/page.tsx` | thin wrapper around Studio |
 | `components/studio/Studio.tsx` | orchestrator: state, autosave, modes (move/connect), menus, spawn logic, shortcuts |
 | `components/studio/nodes.tsx` | Box / Note / Text / Table / Layer + shared TableGrid, Grip, Dots, Ports |
-| `components/studio/MdArea.tsx` | the markdown editor: slash menu, list continuation, auto-grow, autofocus |
+| `components/studio/MdArea.tsx` | the markdown editor: slash menu, list continuation, auto-grow, autofocus, caret-safe local state |
+| `components/studio/RichMd.tsx` | hybrid segment editor: md ↔ segments, inline table & code widgets |
 | `components/studio/WireEdge.tsx` | the arrow: label editing, ✕ disconnect, wide hit area |
 | `components/studio/ContextMenu.tsx` | the four right-click menus |
 | `components/studio/ExpandModal.tsx` | full view per node type |
@@ -236,6 +249,9 @@ Output doc shape: `# name` → date line → `## System diagram` → `## Connect
 7. **Spawns never overlap and always arrive ready to type.**
 8. **Mono aesthetic** — Geist Mono, paper/ink/coral tokens, flat boxes. The
    canvas looks like its own export.
+9. **The markdown string is the only model.** Inline widgets (tables, code)
+   parse from it and serialize back losslessly — never a parallel data shape.
+10. **Destructive table ops only fire on empty targets** (−row/−col).
 
 ---
 
