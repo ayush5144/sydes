@@ -34,6 +34,7 @@ import { ContextMenu, type MenuState } from "./ContextMenu";
 import { ExpandModal } from "./ExpandModal";
 import { ExpandContext } from "./expand-context";
 import { ExportModal } from "./ExportModal";
+import { FreshTray } from "./FreshTray";
 import { BoxNode, LayerNode, NoteNode, TableNode, TextNode } from "./nodes";
 import { Palette } from "./Palette";
 import { SearchBar } from "./SearchBar";
@@ -71,6 +72,7 @@ function StudioInner() {
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [expandId, setExpandId] = useState<string | null>(null);
+  const [moveId, setMoveId] = useState<string | null>(null);
   const { screenToFlowPosition, getViewport, addNodes, setCenter } = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
@@ -230,6 +232,58 @@ function StudioInner() {
     setEdges((es) => es.filter((e) => e.source !== id && e.target !== id));
   };
 
+  // move mode: the card follows the cursor until a click places it
+  useEffect(() => {
+    if (!moveId) return;
+    const onMove = (e: MouseEvent) => {
+      const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      setNodes((ns) =>
+        ns.map((n) =>
+          n.id === moveId
+            ? {
+                ...n,
+                position: {
+                  x: pos.x - (n.measured?.width ?? 180) / 2,
+                  y: pos.y - (n.measured?.height ?? 50) / 2,
+                },
+              }
+            : n
+        )
+      );
+    };
+    const place = () => setMoveId(null);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMoveId(null);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousedown", place);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousedown", place);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [moveId, screenToFlowPosition, setNodes]);
+
+  // right-clicking a connection dot opens the node menu
+  useEffect(() => {
+    const onNodeMenu = (ev: Event) => {
+      const { id, x, y } = (ev as CustomEvent<{ id: string; x: number; y: number }>).detail;
+      const node = nodes.find((n) => n.id === id);
+      if (!node) return;
+      setMenu({
+        kind: "node",
+        id,
+        expandable: EXPANDABLE.has(node.type ?? ""),
+        connected: edges.some((ed) => ed.source === id || ed.target === id),
+        x,
+        y,
+      });
+    };
+    window.addEventListener("sydes-node-menu", onNodeMenu);
+    return () => window.removeEventListener("sydes-node-menu", onNodeMenu);
+  }, [nodes, edges]);
+
   const jumpTo = (id: string) => {
     const n = nodes.find((x) => x.id === id);
     if (!n) return;
@@ -271,6 +325,7 @@ function StudioInner() {
       >
         <Palette onAdd={addFromPalette} />
         <SearchBar nodes={nodes} onJump={jumpTo} />
+        <FreshTray nodes={nodes} edges={edges} onJump={jumpTo} />
         <ExpandContext.Provider value={setExpandId}>
         <ReactFlow
           nodes={nodes}
@@ -340,9 +395,21 @@ function StudioInner() {
           }}
           onDrop={(e) => {
             e.preventDefault();
+            const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+            const moveNodeId = e.dataTransfer.getData("application/sydes-move");
+            if (moveNodeId) {
+              // dragged from the fresh tray → reposition the existing node
+              setNodes((ns) =>
+                ns.map((n) =>
+                  n.id === moveNodeId
+                    ? { ...n, position: { x: pos.x - 90, y: pos.y - 20 }, selected: true }
+                    : { ...n, selected: false }
+                )
+              );
+              return;
+            }
             const kind = e.dataTransfer.getData("application/sydes") as NodeKind;
             if (!kind) return;
-            const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
             addAt(kind, { x: pos.x - 90, y: pos.y - 20 });
           }}
         >
@@ -363,6 +430,7 @@ function StudioInner() {
             ⌫ delete
           </div>
         )}
+        {moveId && <div className="sy-move-hint">moving — click to place · esc cancels</div>}
         {!dragging && (
           <button className="sy-help-btn" onClick={() => setHelpOpen((v) => !v)}>
             ?
@@ -387,6 +455,7 @@ function StudioInner() {
             menu={menu}
             onClose={() => setMenu(null)}
             onExpand={setExpandId}
+            onMove={setMoveId}
             onDuplicate={duplicateNode}
             onDeleteNode={deleteNode}
             onDisconnect={(id) => setEdges((es) => es.filter((e) => e.id !== id))}

@@ -1016,6 +1016,67 @@ kbd {
   color: var(--muted);
 }
 
+/* ============ fresh components tray ============ */
+
+.sy-tray {
+  position: absolute;
+  top: 64px;
+  right: 14px;
+  z-index: 9;
+  width: 250px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(20, 20, 16, 0.06);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sy-tray-title {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 4px 8px 6px;
+  border-bottom: 1px dashed var(--line);
+  margin-bottom: 4px;
+}
+.sy-tray-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  padding: 6px 9px;
+  border-radius: 4px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11.5px;
+  color: var(--muted);
+  cursor: grab;
+}
+.sy-tray-item:hover {
+  background: var(--paper);
+  color: var(--accent);
+}
+
+/* ============ move mode hint ============ */
+
+.sy-move-hint {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11.5px;
+  padding: 7px 16px;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
 /* ============ minimap ============ */
 
 .sy-minimap {

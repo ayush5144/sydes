@@ -16,6 +16,7 @@ export function ContextMenu({
   menu,
   onClose,
   onExpand,
+  onMove,
   onDuplicate,
   onDeleteNode,
   onDisconnect,
@@ -26,6 +27,7 @@ export function ContextMenu({
   menu: MenuState;
   onClose: () => void;
   onExpand: (id: string) => void;
+  onMove: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDeleteNode: (id: string) => void;
   onDisconnect: (id: string) => void;
@@ -52,6 +54,7 @@ export function ContextMenu({
       <div className="sy-menu" style={{ left: menu.x, top: menu.y }}>
         {menu.kind === "node" && [
           menu.expandable ? item("expand — full view", () => onExpand(menu.id!)) : null,
+          item("move — click to place", () => onMove(menu.id!)),
           item("duplicate", () => onDuplicate(menu.id!)),
           menu.connected ? item("disconnect", () => onDisconnectNode(menu.id!)) : null,
           item("delete", () => onDeleteNode(menu.id!), true),

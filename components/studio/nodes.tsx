@@ -14,13 +14,23 @@ import type { BoxData, LayerData, NoteData, TableData } from "../../lib/types";
 import { ExpandContext } from "./expand-context";
 import { MdArea } from "./MdArea";
 
-function Ports() {
+function Ports({ nodeId }: { nodeId: string }) {
+  // right-clicking a connection dot opens the node menu (with disconnect)
+  const onMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.dispatchEvent(
+      new CustomEvent("sydes-node-menu", {
+        detail: { id: nodeId, x: e.clientX, y: e.clientY },
+      })
+    );
+  };
   return (
     <>
-      <Handle type="target" position={Position.Top} id="t" />
-      <Handle type="target" position={Position.Left} id="l" />
-      <Handle type="source" position={Position.Bottom} id="b" />
-      <Handle type="source" position={Position.Right} id="r" />
+      <Handle type="target" position={Position.Top} id="t" onContextMenu={onMenu} />
+      <Handle type="target" position={Position.Left} id="l" onContextMenu={onMenu} />
+      <Handle type="source" position={Position.Bottom} id="b" onContextMenu={onMenu} />
+      <Handle type="source" position={Position.Right} id="r" onContextMenu={onMenu} />
     </>
   );
 }
@@ -81,7 +91,7 @@ export function BoxNode({ id, data, selected }: NodeProps<Node<BoxData, "box">>)
           onChange={(v) => updateNodeData(id, { lines: v })}
         />
       )}
-      <Ports />
+      <Ports nodeId={id} />
     </div>
   );
 }
@@ -103,7 +113,7 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
       ) : (
         <MdView md={data.text} className="sy-note-text" />
       )}
-      <Ports />
+      <Ports nodeId={id} />
     </div>
   );
 }
@@ -233,7 +243,7 @@ export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "tab
           )}
         </>
       )}
-      <Ports />
+      <Ports nodeId={id} />
     </div>
   );
 }
