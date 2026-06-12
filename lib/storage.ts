@@ -53,7 +53,8 @@ export function deleteDiagram(id: string) {
 }
 
 export function blankMdFile(name = "untitled"): SydesFile {
-  return { id: `d-${uid()}`, name, kind: "md", content: "", updatedAt: Date.now() };
+  // every file starts the same way: a heading, like a notion page
+  return { id: `d-${uid()}`, name, kind: "md", content: `# ${name}\n`, updatedAt: Date.now() };
 }
 
 function starterMdFile(): SydesFile {

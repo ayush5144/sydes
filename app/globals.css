@@ -798,12 +798,24 @@ kbd {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  padding: 32px 20px 72px;
 }
 
+/* the page: a sheet you start on — grows as far as you write */
 .sy-page {
-  max-width: 760px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 48px 32px 120px;
+  padding: 56px 64px 110px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(20, 20, 16, 0.04), 0 12px 36px rgba(20, 20, 16, 0.05);
+  min-height: calc(100dvh - 200px);
+}
+@media (max-width: 700px) {
+  .sy-page {
+    padding: 32px 22px 80px;
+  }
 }
 
 .sy-block {
@@ -885,12 +897,14 @@ kbd {
   border-color: var(--wire);
 }
 
+/* an empty field is still a visible field */
 .sy-page-add {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 8px 8px 8px 30px;
-  margin-top: 4px;
+  padding: 11px 13px;
+  margin-top: 10px;
+  border: 1.5px dashed var(--line);
   border-radius: 5px;
   color: #c4c3bb;
   font-family: var(--font-geist-mono), monospace;
@@ -898,7 +912,8 @@ kbd {
 }
 .sy-page-add:hover {
   color: var(--muted);
-  background: rgba(235, 234, 228, 0.4);
+  border-color: var(--wire);
+  background: rgba(235, 234, 228, 0.3);
 }
 
 .sy-page-hint {

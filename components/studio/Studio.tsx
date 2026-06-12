@@ -98,7 +98,14 @@ function StudioInner() {
   );
 
   const openDoc = useCallback(
-    (doc: SydesFile) => {
+    (docIn: SydesFile) => {
+      let doc = docIn;
+      // md-only: legacy canvas files convert to documents on open.
+      // nodes/edges stay stored on the file as a safety net.
+      if (doc.kind === "canvas") {
+        doc = { ...doc, kind: "md", content: toMarkdown(doc) };
+        saveDiagram(doc);
+      }
       setCurrentId(doc.id);
       setName(doc.name);
       setKind(doc.kind);
