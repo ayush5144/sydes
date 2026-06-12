@@ -27,6 +27,7 @@ export function MdArea({
   className,
   minRows = 2,
   autoFocusIfEmpty = false,
+  focusOnMount = false,
   slash = true,
 }: {
   value: string;
@@ -35,6 +36,7 @@ export function MdArea({
   className?: string;
   minRows?: number;
   autoFocusIfEmpty?: boolean;
+  focusOnMount?: boolean;
   slash?: boolean;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -51,9 +53,17 @@ export function MdArea({
     }
   }, [value]);
 
-  // a freshly created empty node should be ready to type into
+  // a freshly created empty node should be ready to type into;
+  // focusOnMount also restores the caret when switching view → edit
   useEffect(() => {
-    if (autoFocusIfEmpty && !value) ref.current?.focus();
+    const el = ref.current;
+    if (!el) return;
+    if (focusOnMount) {
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    } else if (autoFocusIfEmpty && !value) {
+      el.focus();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

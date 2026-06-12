@@ -8,8 +8,10 @@ import {
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
+import { MdView } from "../../lib/markdown";
 import type { BoxData, LayerData, NoteData, TableData } from "../../lib/types";
+import { ExpandContext } from "./expand-context";
 import { MdArea } from "./MdArea";
 
 function Ports() {
@@ -20,6 +22,22 @@ function Ports() {
       <Handle type="source" position={Position.Bottom} id="b" />
       <Handle type="source" position={Position.Right} id="r" />
     </>
+  );
+}
+
+function Dots({ id }: { id: string }) {
+  const open = useContext(ExpandContext);
+  return (
+    <button
+      className="nodrag sy-dots"
+      title="expand"
+      onClick={(e) => {
+        e.stopPropagation();
+        open(id);
+      }}
+    >
+      ⋯
+    </button>
   );
 }
 
@@ -34,6 +52,7 @@ export function BoxNode({ id, data, selected }: NodeProps<Node<BoxData, "box">>)
   const showBody = selected || data.lines.length > 0;
   return (
     <div className={`sy-node sy-box ${selected ? "sy-sel" : ""}`}>
+      <Dots id={id} />
       <input
         ref={titleRef}
         className="nodrag sy-title"
@@ -61,13 +80,18 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
   const { updateNodeData } = useReactFlow();
   return (
     <div className={`sy-node sy-note ${selected ? "sy-sel" : ""}`}>
-      <MdArea
-        className="sy-note-text"
-        value={data.text}
-        placeholder={"jot here…  /  for blocks"}
-        autoFocusIfEmpty={selected}
-        onChange={(v) => updateNodeData(id, { text: v })}
-      />
+      <Dots id={id} />
+      {selected ? (
+        <MdArea
+          className="sy-note-text"
+          value={data.text}
+          placeholder={"jot here…  /  for blocks"}
+          focusOnMount
+          onChange={(v) => updateNodeData(id, { text: v })}
+        />
+      ) : (
+        <MdView md={data.text} className="sy-note-text" />
+      )}
       <Ports />
     </div>
   );
@@ -77,21 +101,36 @@ export function TextNode({ id, data, selected }: NodeProps<Node<NoteData, "text"
   const { updateNodeData } = useReactFlow();
   return (
     <div className={`sy-textnode ${selected ? "sy-sel" : ""}`}>
-      <MdArea
-        className="sy-text-area"
-        value={data.text}
-        placeholder={"write…  /  for blocks"}
-        autoFocusIfEmpty={selected}
-        onChange={(v) => updateNodeData(id, { text: v })}
-      />
+      <Dots id={id} />
+      {selected ? (
+        <MdArea
+          className="sy-text-area"
+          value={data.text}
+          placeholder={"write…  /  for blocks"}
+          focusOnMount
+          onChange={(v) => updateNodeData(id, { text: v })}
+        />
+      ) : (
+        <MdView md={data.text} className="sy-text-area" />
+      )}
     </div>
   );
 }
 
-export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "table">>) {
+/** The editable grid — shared by the canvas table node and the expand modal. */
+export function TableGrid({
+  id,
+  data,
+  tools,
+  big,
+}: {
+  id: string;
+  data: TableData;
+  tools: boolean;
+  big?: boolean;
+}) {
   const { updateNodeData } = useReactFlow();
   const rows = data.rows;
-  const collapsed = !!data.collapsed;
   const setCell = (r: number, c: number, v: string) => {
     const next = rows.map((row) => [...row]);
     next[r][c] = v;
@@ -102,9 +141,48 @@ export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "tab
   const delRow = () => rows.length > 2 && updateNodeData(id, { rows: rows.slice(0, -1) });
   const delCol = () =>
     rows[0].length > 1 && updateNodeData(id, { rows: rows.map((r) => r.slice(0, -1)) });
+  return (
+    <>
+      <table className={big ? "sy-grid-big" : undefined}>
+        <tbody>
+          {rows.map((row, r) => (
+            <tr key={r}>
+              {row.map((cell, c) => (
+                <td key={c}>
+                  <input
+                    className={`nodrag ${r === 0 ? "sy-th" : ""}`}
+                    value={cell}
+                    placeholder={r === 0 ? "col" : ""}
+                    spellCheck={false}
+                    onChange={(e) => setCell(r, c, e.target.value)}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {tools && (
+        <div className="sy-table-tools nodrag">
+          <button onClick={addRow}>+row</button>
+          <button onClick={addCol}>+col</button>
+          <button onClick={delRow}>−row</button>
+          <button onClick={delCol}>−col</button>
+          {data.note === undefined && (
+            <button onClick={() => updateNodeData(id, { note: "" })}>+note</button>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
 
+export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "table">>) {
+  const { updateNodeData } = useReactFlow();
+  const collapsed = !!data.collapsed;
   return (
     <div className={`sy-node sy-table ${selected ? "sy-sel" : ""}`}>
+      <Dots id={id} />
       <div className="sy-table-head">
         <button
           className="nodrag sy-collapse"
@@ -122,31 +200,16 @@ export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "tab
         />
       </div>
       {collapsed ? (
-        <div className="sy-table-mini nodrag" onDoubleClick={() => updateNodeData(id, { collapsed: false })}>
-          {Math.max(0, rows.length - 1)} rows · {rows[0]?.length ?? 0} cols
+        <div
+          className="sy-table-mini nodrag"
+          onDoubleClick={() => updateNodeData(id, { collapsed: false })}
+        >
+          {Math.max(0, data.rows.length - 1)} rows · {data.rows[0]?.length ?? 0} cols
         </div>
       ) : (
         <>
-          <table>
-            <tbody>
-              {rows.map((row, r) => (
-                <tr key={r}>
-                  {row.map((cell, c) => (
-                    <td key={c}>
-                      <input
-                        className={`nodrag ${r === 0 ? "sy-th" : ""}`}
-                        value={cell}
-                        placeholder={r === 0 ? "col" : ""}
-                        spellCheck={false}
-                        onChange={(e) => setCell(r, c, e.target.value)}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {(data.note !== undefined && (selected || data.note)) && (
+          <TableGrid id={id} data={data} tools={selected} />
+          {data.note !== undefined && (selected || data.note) && (
             <MdArea
               className="sy-table-note"
               value={data.note ?? ""}
@@ -154,17 +217,6 @@ export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "tab
               minRows={1}
               onChange={(v) => updateNodeData(id, { note: v })}
             />
-          )}
-          {selected && (
-            <div className="sy-table-tools nodrag">
-              <button onClick={addRow}>+row</button>
-              <button onClick={addCol}>+col</button>
-              <button onClick={delRow}>−row</button>
-              <button onClick={delCol}>−col</button>
-              {data.note === undefined && (
-                <button onClick={() => updateNodeData(id, { note: "" })}>+note</button>
-              )}
-            </div>
           )}
         </>
       )}

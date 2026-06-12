@@ -7,6 +7,7 @@ import {
   ConnectionMode,
   Controls,
   MarkerType,
+  MiniMap,
   ReactFlow,
   ReactFlowProvider,
   reconnectEdge,
@@ -30,9 +31,12 @@ import {
 } from "../../lib/storage";
 import type { DiagramDoc, DiagramMeta, Direction } from "../../lib/types";
 import { ContextMenu, type MenuState } from "./ContextMenu";
+import { ExpandModal } from "./ExpandModal";
+import { ExpandContext } from "./expand-context";
 import { ExportModal } from "./ExportModal";
 import { BoxNode, LayerNode, NoteNode, TableNode, TextNode } from "./nodes";
 import { Palette } from "./Palette";
+import { SearchBar } from "./SearchBar";
 import { TopBar } from "./TopBar";
 import { WireEdge } from "./WireEdge";
 
@@ -50,6 +54,8 @@ const defaultEdgeOptions = {
   markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#9a9a93" },
 };
 
+const EXPANDABLE = new Set(["box", "note", "text", "table"]);
+
 function StudioInner() {
   const [ready, setReady] = useState(false);
   const [currentId, setCurrentId] = useState("");
@@ -64,7 +70,8 @@ function StudioInner() {
   const [overTrash, setOverTrash] = useState(false);
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
-  const { screenToFlowPosition, getViewport, addNodes } = useReactFlow();
+  const [expandId, setExpandId] = useState<string | null>(null);
+  const { screenToFlowPosition, getViewport, addNodes, setCenter } = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
   const reconnectOk = useRef(true);
@@ -223,6 +230,17 @@ function StudioInner() {
     setEdges((es) => es.filter((e) => e.source !== id && e.target !== id));
   };
 
+  const jumpTo = (id: string) => {
+    const n = nodes.find((x) => x.id === id);
+    if (!n) return;
+    setCenter(
+      n.position.x + (n.measured?.width ?? 200) / 2,
+      n.position.y + (n.measured?.height ?? 60) / 2,
+      { zoom: 1.15, duration: 500 }
+    );
+    setNodes((ns) => ns.map((x) => ({ ...x, selected: x.id === id })));
+  };
+
   if (!ready) return <div className="sy-loading">sydes…</div>;
 
   return (
@@ -252,6 +270,8 @@ function StudioInner() {
         }}
       >
         <Palette onAdd={addFromPalette} />
+        <SearchBar nodes={nodes} onJump={jumpTo} />
+        <ExpandContext.Provider value={setExpandId}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -289,7 +309,13 @@ function StudioInner() {
           }}
           onNodeContextMenu={(e, node) => {
             e.preventDefault();
-            setMenu({ kind: "node", id: node.id, x: e.clientX, y: e.clientY });
+            setMenu({
+              kind: "node",
+              id: node.id,
+              expandable: EXPANDABLE.has(node.type ?? ""),
+              x: e.clientX,
+              y: e.clientY,
+            });
           }}
           onEdgeContextMenu={(e, edge) => {
             e.preventDefault();
@@ -321,7 +347,16 @@ function StudioInner() {
         >
           <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#dddcd6" />
           <Controls showInteractive={false} />
+          <MiniMap
+            position="bottom-right"
+            className="sy-minimap"
+            pannable
+            zoomable
+            nodeColor="#d8d7d0"
+            maskColor="rgba(250, 250, 248, 0.7)"
+          />
         </ReactFlow>
+        </ExpandContext.Provider>
         {dragging && (
           <div ref={trashRef} className={`sy-trash ${overTrash ? "sy-trash-hot" : ""}`}>
             ⌫ delete
@@ -335,7 +370,9 @@ function StudioInner() {
         {helpOpen && (
           <div className="sy-help">
             <div className="sy-help-row"><span>add</span><span>drag from palette · double-click canvas · right-click</span></div>
+            <div className="sy-help-row"><span>full view</span><span>⋯ in a card&apos;s corner · right-click → expand</span></div>
             <div className="sy-help-row"><span>minimize table</span><span>▾ next to its title; double-click to expand</span></div>
+            <div className="sy-help-row"><span>find anything</span><span>search bar top-right; minimap to jump around</span></div>
             <div className="sy-help-row"><span>connect</span><span>drag from a node&apos;s edge to another node</span></div>
             <div className="sy-help-row"><span>disconnect</span><span>right-click the arrow · drag its end away</span></div>
             <div className="sy-help-row"><span>label arrow</span><span>double-click the arrow</span></div>
@@ -348,6 +385,7 @@ function StudioInner() {
           <ContextMenu
             menu={menu}
             onClose={() => setMenu(null)}
+            onExpand={setExpandId}
             onDuplicate={duplicateNode}
             onDeleteNode={deleteNode}
             onDisconnect={(id) => setEdges((es) => es.filter((e) => e.id !== id))}
@@ -367,6 +405,12 @@ function StudioInner() {
           doc={currentDoc()}
           onClose={() => setExportMd(null)}
           onImport={importDoc}
+        />
+      )}
+      {expandId && nodes.find((n) => n.id === expandId) && (
+        <ExpandModal
+          node={nodes.find((n) => n.id === expandId)!}
+          onClose={() => setExpandId(null)}
         />
       )}
     </div>

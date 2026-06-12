@@ -6,6 +6,7 @@ export type MenuState = {
   kind: "node" | "edge" | "pane";
   id?: string;
   hasLabel?: boolean;
+  expandable?: boolean;
   x: number;
   y: number;
 };
@@ -13,6 +14,7 @@ export type MenuState = {
 export function ContextMenu({
   menu,
   onClose,
+  onExpand,
   onDuplicate,
   onDeleteNode,
   onDisconnect,
@@ -21,6 +23,7 @@ export function ContextMenu({
 }: {
   menu: MenuState;
   onClose: () => void;
+  onExpand: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDeleteNode: (id: string) => void;
   onDisconnect: (id: string) => void;
@@ -45,6 +48,7 @@ export function ContextMenu({
       <div className="sy-menu-back" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }} />
       <div className="sy-menu" style={{ left: menu.x, top: menu.y }}>
         {menu.kind === "node" && [
+          menu.expandable ? item("expand — full view", () => onExpand(menu.id!)) : null,
           item("duplicate", () => onDuplicate(menu.id!)),
           item("delete", () => onDeleteNode(menu.id!), true),
         ]}

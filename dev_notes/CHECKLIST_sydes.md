@@ -33,6 +33,12 @@
 - [x] Notes export verbatim (they are markdown)
 - [x] Notes-first: new canvas starts with a note, not a box
 - [x] ? help card, action-first wording; double-click canvas adds a box
+- [x] Rendered markdown view mode: notes/text show real headings, code
+      blocks, tables, todos, quotes when not being edited (lib/markdown.tsx)
+- [x] Full view (expand): ⋯ on every card + right-click → expand; notes/
+      text get editor + live preview split, tables get a big editable grid
+- [x] Search bar (top-right): searches every node, jump-to + select
+- [x] MiniMap (pannable/zoomable) for canvas navigation
 
 ## Phase 1 — pages & blocks (the notes direction)
 
