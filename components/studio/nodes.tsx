@@ -25,6 +25,15 @@ function Ports() {
   );
 }
 
+/* drag affordance — no "nodrag" class, so grabbing it moves the node */
+function Grip() {
+  return (
+    <span className="sy-grip" title="drag to move">
+      ⠿
+    </span>
+  );
+}
+
 function Dots({ id }: { id: string }) {
   const open = useContext(ExpandContext);
   return (
@@ -52,6 +61,7 @@ export function BoxNode({ id, data, selected }: NodeProps<Node<BoxData, "box">>)
   const showBody = selected || data.lines.length > 0;
   return (
     <div className={`sy-node sy-box ${selected ? "sy-sel" : ""}`}>
+      <Grip />
       <Dots id={id} />
       <input
         ref={titleRef}
@@ -80,6 +90,7 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
   const { updateNodeData } = useReactFlow();
   return (
     <div className={`sy-node sy-note ${selected ? "sy-sel" : ""}`}>
+      <Grip />
       <Dots id={id} />
       {selected ? (
         <MdArea
@@ -101,6 +112,7 @@ export function TextNode({ id, data, selected }: NodeProps<Node<NoteData, "text"
   const { updateNodeData } = useReactFlow();
   return (
     <div className={`sy-textnode ${selected ? "sy-sel" : ""}`}>
+      <Grip />
       <Dots id={id} />
       {selected ? (
         <MdArea
@@ -182,6 +194,7 @@ export function TableNode({ id, data, selected }: NodeProps<Node<TableData, "tab
   const collapsed = !!data.collapsed;
   return (
     <div className={`sy-node sy-table ${selected ? "sy-sel" : ""}`}>
+      <Grip />
       <Dots id={id} />
       <div className="sy-table-head">
         <button

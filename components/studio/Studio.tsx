@@ -313,6 +313,7 @@ function StudioInner() {
               kind: "node",
               id: node.id,
               expandable: EXPANDABLE.has(node.type ?? ""),
+              connected: edges.some((ed) => ed.source === node.id || ed.target === node.id),
               x: e.clientX,
               y: e.clientY,
             });
@@ -389,6 +390,9 @@ function StudioInner() {
             onDuplicate={duplicateNode}
             onDeleteNode={deleteNode}
             onDisconnect={(id) => setEdges((es) => es.filter((e) => e.id !== id))}
+            onDisconnectNode={(id) =>
+              setEdges((es) => es.filter((e) => e.source !== id && e.target !== id))
+            }
             onClearLabel={(id) =>
               setEdges((es) => es.map((e) => (e.id === id ? { ...e, label: undefined } : e)))
             }

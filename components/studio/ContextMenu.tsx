@@ -7,6 +7,7 @@ export type MenuState = {
   id?: string;
   hasLabel?: boolean;
   expandable?: boolean;
+  connected?: boolean;
   x: number;
   y: number;
 };
@@ -18,6 +19,7 @@ export function ContextMenu({
   onDuplicate,
   onDeleteNode,
   onDisconnect,
+  onDisconnectNode,
   onClearLabel,
   onAddHere,
 }: {
@@ -27,6 +29,7 @@ export function ContextMenu({
   onDuplicate: (id: string) => void;
   onDeleteNode: (id: string) => void;
   onDisconnect: (id: string) => void;
+  onDisconnectNode: (id: string) => void;
   onClearLabel: (id: string) => void;
   onAddHere: (kind: NodeKind, x: number, y: number) => void;
 }) {
@@ -50,6 +53,7 @@ export function ContextMenu({
         {menu.kind === "node" && [
           menu.expandable ? item("expand — full view", () => onExpand(menu.id!)) : null,
           item("duplicate", () => onDuplicate(menu.id!)),
+          menu.connected ? item("disconnect", () => onDisconnectNode(menu.id!)) : null,
           item("delete", () => onDeleteNode(menu.id!), true),
         ]}
         {menu.kind === "edge" && [
