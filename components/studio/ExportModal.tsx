@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { DiagramDoc } from "../../lib/types";
+import type { SydesFile } from "../../lib/types";
 
 function download(filename: string, content: string, type: string) {
   const blob = new Blob([content], { type });
@@ -18,14 +18,14 @@ const slug = (s: string) =>
 
 export function ExportModal({
   md,
-  doc,
+  file,
   onClose,
   onImport,
 }: {
   md: string;
-  doc: DiagramDoc;
+  file: SydesFile;
   onClose: () => void;
-  onImport: (doc: DiagramDoc) => void;
+  onImport: (doc: SydesFile) => void;
 }) {
   const [copied, setCopied] = useState(false);
   return (
@@ -47,14 +47,14 @@ export function ExportModal({
           >
             {copied ? "copied ✓" : "copy markdown"}
           </button>
-          <button onClick={() => download(`${slug(doc.name)}.md`, md, "text/markdown")}>
+          <button onClick={() => download(`${slug(file.name)}.md`, md, "text/markdown")}>
             download .md
           </button>
           <div className="sy-spacer" />
           <button
             className="sy-quiet"
             onClick={() =>
-              download(`${slug(doc.name)}.json`, JSON.stringify(doc, null, 2), "application/json")
+              download(`${slug(file.name)}.json`, JSON.stringify(file, null, 2), "application/json")
             }
           >
             backup .json
@@ -68,8 +68,8 @@ export function ExportModal({
                 const f = e.target.files?.[0];
                 if (!f) return;
                 try {
-                  const parsed = JSON.parse(await f.text()) as DiagramDoc;
-                  if (parsed && Array.isArray(parsed.nodes) && Array.isArray(parsed.edges)) {
+                  const parsed = JSON.parse(await f.text()) as SydesFile;
+                  if (parsed && (typeof parsed.content === "string" || Array.isArray(parsed.nodes))) {
                     onImport(parsed);
                     onClose();
                   }

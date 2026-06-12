@@ -76,6 +76,7 @@ export function starterDiagram(): DiagramDoc {
   return {
     id: `d-${uid()}`,
     name: "untitled system",
+    kind: "canvas",
     direction: "v",
     nodes,
     edges,
@@ -88,6 +89,7 @@ export function blankDiagram(name = "untitled"): DiagramDoc {
   return {
     id: `d-${uid()}`,
     name,
+    kind: "canvas",
     direction: "v",
     nodes: [{ ...makeNode("note", { x: 280, y: 140 }), selected: true }],
     edges: [],

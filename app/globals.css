@@ -792,6 +792,139 @@ kbd {
   line-height: 1.55;
 }
 
+/* ============ document editor (md-first) ============ */
+
+.sy-docwrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.sy-doc {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 32px 120px;
+}
+
+.sy-block {
+  position: relative;
+  padding: 2px 8px 2px 30px;
+  border-radius: 5px;
+  border-top: 2px solid transparent;
+}
+.sy-block:hover {
+  background: rgba(235, 234, 228, 0.4);
+}
+.sy-block-over {
+  border-top-color: var(--accent);
+}
+
+.sy-block-handle {
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  color: #c4c3bb;
+  font-size: 12px;
+  letter-spacing: -2px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.12s;
+  user-select: none;
+  padding: 2px 4px;
+}
+.sy-block:hover .sy-block-handle {
+  opacity: 1;
+}
+.sy-block-handle:hover {
+  color: var(--accent);
+}
+
+.sy-block-view {
+  cursor: text;
+}
+.sy-doc .sy-md {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.sy-doc .sy-md-h1 {
+  font-size: 26px;
+  margin: 10px 0 6px;
+}
+.sy-doc .sy-md-h2 {
+  font-size: 19px;
+  margin: 10px 0 4px;
+}
+.sy-doc .sy-md-h3 {
+  font-size: 15.5px;
+}
+.sy-doc .sy-md-code {
+  font-size: 12.5px;
+}
+.sy-doc .sy-md-table th,
+.sy-doc .sy-md-table td {
+  font-size: 12.5px;
+  padding: 6px 12px;
+}
+
+.sy-block-editor {
+  display: block;
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13.5px;
+  line-height: 1.7;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+}
+.sy-block-editor:focus {
+  border-color: var(--wire);
+}
+
+.sy-doc-add {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 8px 8px 30px;
+  margin-top: 4px;
+  border-radius: 5px;
+  color: #c4c3bb;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+}
+.sy-doc-add:hover {
+  color: var(--muted);
+  background: rgba(235, 234, 228, 0.4);
+}
+
+.sy-doc-hint {
+  margin-top: 48px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+  color: #c4c3bb;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+}
+.sy-hint-handle {
+  letter-spacing: -2px;
+}
+
+.sy-md-meta {
+  color: #d6d5cd;
+  font-size: 11px;
+  user-select: none;
+}
+
+.sy-file-glyph {
+  color: var(--muted);
+  margin-right: 8px;
+  font-size: 11px;
+}
+
 /* ============ rendered markdown (view mode) ============ */
 
 .sy-md {

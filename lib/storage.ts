@@ -1,5 +1,6 @@
-import type { DiagramDoc, DiagramMeta } from "./types";
-import { starterDiagram } from "./factory";
+import type { DiagramMeta, SydesFile } from "./types";
+import { STARTER_MD } from "./blocks";
+import { uid } from "./factory";
 
 const INDEX_KEY = "sydes:index";
 const LAST_KEY = "sydes:last";
@@ -22,22 +23,25 @@ function writeIndex(list: DiagramMeta[]) {
   localStorage.setItem(INDEX_KEY, JSON.stringify(list));
 }
 
-export function loadDiagram(id: string): DiagramDoc | null {
+export function loadDiagram(id: string): SydesFile | null {
   if (!canStore()) return null;
   try {
     const raw = localStorage.getItem(docKey(id));
-    return raw ? (JSON.parse(raw) as DiagramDoc) : null;
+    if (!raw) return null;
+    const file = JSON.parse(raw) as SydesFile;
+    if (!file.kind) file.kind = "canvas"; // files predating the md pivot
+    return file;
   } catch {
     return null;
   }
 }
 
-export function saveDiagram(doc: DiagramDoc) {
+export function saveDiagram(doc: SydesFile) {
   if (!canStore()) return;
   doc.updatedAt = Date.now();
   localStorage.setItem(docKey(doc.id), JSON.stringify(doc));
   const list = listDiagrams().filter((m) => m.id !== doc.id);
-  list.unshift({ id: doc.id, name: doc.name, updatedAt: doc.updatedAt });
+  list.unshift({ id: doc.id, name: doc.name, kind: doc.kind, updatedAt: doc.updatedAt });
   writeIndex(list);
   localStorage.setItem(LAST_KEY, doc.id);
 }
@@ -48,9 +52,23 @@ export function deleteDiagram(id: string) {
   writeIndex(listDiagrams().filter((m) => m.id !== id));
 }
 
-/** Last-opened diagram, or a starter one on first visit. */
-export function initialDiagram(): DiagramDoc {
-  if (!canStore()) return starterDiagram();
+export function blankMdFile(name = "untitled"): SydesFile {
+  return { id: `d-${uid()}`, name, kind: "md", content: "", updatedAt: Date.now() };
+}
+
+function starterMdFile(): SydesFile {
+  return {
+    id: `d-${uid()}`,
+    name: "welcome",
+    kind: "md",
+    content: STARTER_MD,
+    updatedAt: Date.now(),
+  };
+}
+
+/** Last-opened file, or the welcome doc on first visit. */
+export function initialDiagram(): SydesFile {
+  if (!canStore()) return starterMdFile();
   const last = localStorage.getItem(LAST_KEY);
   if (last) {
     const doc = loadDiagram(last);
@@ -61,7 +79,7 @@ export function initialDiagram(): DiagramDoc {
     const doc = loadDiagram(list[0].id);
     if (doc) return doc;
   }
-  const doc = starterDiagram();
+  const doc = starterMdFile();
   saveDiagram(doc);
   return doc;
 }

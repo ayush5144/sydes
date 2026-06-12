@@ -20,17 +20,19 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { blankDiagram, makeNode, uid, type NodeKind } from "../../lib/factory";
+import { makeNode, uid, type NodeKind } from "../../lib/factory";
 import { toMarkdown } from "../../lib/export";
 import {
+  blankMdFile,
   deleteDiagram,
   initialDiagram,
   listDiagrams,
   loadDiagram,
   saveDiagram,
 } from "../../lib/storage";
-import type { DiagramDoc, DiagramMeta, Direction } from "../../lib/types";
+import type { DiagramMeta, Direction, FileKind, SydesFile } from "../../lib/types";
 import { ContextMenu, type MenuState } from "./ContextMenu";
+import { DocEditor } from "./DocEditor";
 import { ExpandModal } from "./ExpandModal";
 import { ExpandContext } from "./expand-context";
 import { ExportModal } from "./ExportModal";
@@ -60,6 +62,8 @@ function StudioInner() {
   const [ready, setReady] = useState(false);
   const [currentId, setCurrentId] = useState("");
   const [name, setName] = useState("");
+  const [kind, setKind] = useState<FileKind>("md");
+  const [content, setContent] = useState("");
   const [direction, setDirection] = useState<Direction>("v");
   const [diagrams, setDiagrams] = useState<DiagramMeta[]>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -86,24 +90,22 @@ function StudioInner() {
   };
 
   const currentDoc = useCallback(
-    (): DiagramDoc => ({
-      id: currentId,
-      name,
-      direction,
-      nodes,
-      edges,
-      updatedAt: Date.now(),
-    }),
-    [currentId, name, direction, nodes, edges]
+    (): SydesFile =>
+      kind === "md"
+        ? { id: currentId, name, kind, content, updatedAt: Date.now() }
+        : { id: currentId, name, kind, direction, nodes, edges, updatedAt: Date.now() },
+    [currentId, name, kind, content, direction, nodes, edges]
   );
 
   const openDoc = useCallback(
-    (doc: DiagramDoc) => {
+    (doc: SydesFile) => {
       setCurrentId(doc.id);
       setName(doc.name);
+      setKind(doc.kind);
+      setContent(doc.content ?? "");
       setDirection(doc.direction ?? "v");
-      setNodes(doc.nodes);
-      setEdges(doc.edges);
+      setNodes(doc.nodes ?? []);
+      setEdges(doc.edges ?? []);
       setDiagrams(listDiagrams());
     },
     [setNodes, setEdges]
@@ -189,7 +191,8 @@ function StudioInner() {
 
   const newDiagram = () => {
     saveDiagram(currentDoc());
-    const doc = blankDiagram();
+    // md-first: every new file is a markdown document
+    const doc = blankMdFile();
     saveDiagram(doc);
     openDoc(doc);
   };
@@ -202,13 +205,13 @@ function StudioInner() {
       const doc = loadDiagram(rest[0].id);
       if (doc) return openDoc(doc);
     }
-    const doc = blankDiagram();
+    const doc = blankMdFile();
     saveDiagram(doc);
     openDoc(doc);
   };
 
-  const importDoc = (doc: DiagramDoc) => {
-    const fresh = { ...doc, id: `d-${uid()}` };
+  const importDoc = (doc: SydesFile) => {
+    const fresh = { ...doc, id: `d-${uid()}`, kind: doc.kind ?? "canvas" };
     saveDiagram(fresh);
     openDoc(fresh);
   };
@@ -248,6 +251,7 @@ function StudioInner() {
       <TopBar
         name={name}
         onName={setName}
+        kind={kind}
         diagrams={diagrams}
         currentId={currentId}
         onSwitch={switchTo}
@@ -255,9 +259,17 @@ function StudioInner() {
         onDelete={removeDiagram}
         direction={direction}
         onDirection={setDirection}
-        onExport={() => setExportMd(toMarkdown(currentDoc()))}
+        onExport={() =>
+          setExportMd(kind === "md" ? content || "\n" : toMarkdown(currentDoc()))
+        }
         saved={saved}
       />
+      {kind === "md" && (
+        <div className="sy-docwrap">
+          <DocEditor content={content} onChange={setContent} />
+        </div>
+      )}
+      {kind === "canvas" && (
       <div
         className="sy-body"
         ref={wrapRef}
@@ -399,10 +411,11 @@ function StudioInner() {
           />
         )}
       </div>
+      )}
       {exportMd !== null && (
         <ExportModal
           md={exportMd}
-          doc={currentDoc()}
+          file={currentDoc()}
           onClose={() => setExportMd(null)}
           onImport={importDoc}
         />

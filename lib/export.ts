@@ -258,7 +258,7 @@ function nodeName(n: Node): string {
 const mdCell = (s: string) => s.replace(/\|/g, "\\|").trim();
 
 export function toMarkdown(doc: DiagramDoc): string {
-  const { nodes, edges, name } = doc;
+  const { name, nodes = [], edges = [] } = doc;
   const parts: string[] = [`# ${name.trim() || "untitled system"}`];
   parts.push(
     `*Exported from sydes — ${new Date().toLocaleDateString("en-GB", {

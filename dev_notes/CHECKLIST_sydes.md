@@ -1,6 +1,34 @@
 # sydes — Checklist
 
 `[ ]` = todo, `[x]` = done. Done means done.
+Direction: `DIRECTION_md_first.md` — pure markdown, no canvas (v2).
+
+## v2 Phase A — the document editor (shipped)
+
+- [x] SydesFile model: kind "md" | "canvas"; legacy canvas files still open
+- [x] New file = markdown document (md-first default); welcome doc on first run
+- [x] Block editor: md string is source of truth, parse/serialize blocks
+      (lib/blocks.ts), click block to edit raw, click away renders
+- [x] Slash inserts + Enter list-continuation inside blocks (MdArea)
+- [x] ⋮⋮ drag to reorder blocks; empty a block to delete it
+- [x] Sydes html comments hidden in render (⌁ marker)
+- [x] Export modal for md = the file itself (copy / download / json backup)
+- [x] files ▾ menu shows ¶/▦ kind glyphs; direction toggle canvas-only
+- [x] Landing copy updated to md-first pitch
+
+## v2 Phase B — rich blocks (NEXT — flow block needs re-approval, see direction doc)
+
+- [ ] Table block: click a md table → edit in the rich grid (TableGrid)
+- [ ] Flow block (PROPOSED, not approved): `a -> b: label` lines →
+      live ascii diagram via the layout engine; source in html comment
+- [ ] Code block: language tag + monospace editing comfort
+
+## v2 Phase C — cleanup & brain
+
+- [ ] Canvas → document migration (run exporter once, embed sources)
+- [ ] Delete React Flow + canvas UI entirely
+- [ ] [[links]] between files; cross-file search
+- [ ] Save-to-folder (File System Access) · zip export of workspace
 
 ## Phase 0 — MVP (shipped)
 

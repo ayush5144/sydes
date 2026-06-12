@@ -28,7 +28,15 @@ no WYSIWYG framework).
 Drag-and-drop = **block reordering** (⋮⋮ handle). Slash commands insert
 blocks. `/` menu: h2, h3, bullet, todo, code, quote, divider, table, flow.
 
-## The flow block — diagrams with zero canvas
+## ⚠ OPEN QUESTION — flow block not yet approved
+
+Ayush has not fully bought into / understood the text-defined flow block
+below (12 June 2026). Before building Phase B, demo it on real examples and
+re-decide. Alternatives if text-flows don't feel right: (a) a mini drag
+canvas scoped inside a flow block (Excalidraw-style embed), or (b) both —
+type arrows OR drag, same block. Do not build B until this is settled.
+
+## The flow block — diagrams with zero canvas (PROPOSED)
 
 You don't drag boxes. You *write* the flow, sydes draws it:
 
