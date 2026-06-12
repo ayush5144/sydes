@@ -85,19 +85,47 @@ export function MdArea({
     }
   };
 
+  const setCaret = (at: number) => {
+    requestAnimationFrame(() => {
+      const el = ref.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(at, at);
+      }
+    });
+  };
+
   const apply = (item: SlashItem) => {
     if (!menu) return;
     const next = value.slice(0, menu.lineStart) + item.insert + value.slice(menu.pos);
     onChange(next);
     setMenu(null);
-    const caret = menu.lineStart + (item.caret ?? item.insert.length);
-    requestAnimationFrame(() => {
-      const el = ref.current;
-      if (el) {
-        el.focus();
-        el.setSelectionRange(caret, caret);
-      }
-    });
+    setCaret(menu.lineStart + (item.caret ?? item.insert.length));
+  };
+
+  // Enter inside a list/todo/quote continues it; Enter on an empty item ends it
+  const continueBlock = (e: React.KeyboardEvent<HTMLTextAreaElement>): boolean => {
+    const el = ref.current;
+    if (!el || el.selectionStart !== el.selectionEnd) return false;
+    const pos = el.selectionStart;
+    const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
+    const line = value.slice(lineStart, pos);
+    const m = line.match(/^(\s*)([-*] \[[ xX]\] |[-*] |> |(\d+)\. )/);
+    if (!m) return false;
+    e.preventDefault();
+    const content = line.slice(m[0].length);
+    if (!content.trim()) {
+      // empty item → drop the marker, exit the list
+      onChange(value.slice(0, lineStart) + value.slice(pos));
+      setCaret(lineStart);
+      return true;
+    }
+    let prefix = m[1] + m[2];
+    if (m[3]) prefix = `${m[1]}${parseInt(m[3], 10) + 1}. `;
+    prefix = prefix.replace(/\[[xX]\]/, "[ ]"); // next todo starts unchecked
+    onChange(value.slice(0, pos) + "\n" + prefix + value.slice(pos));
+    setCaret(pos + 1 + prefix.length);
+    return true;
   };
 
   return (
@@ -114,12 +142,18 @@ export function MdArea({
           detect(e.target.value);
         }}
         onKeyDown={(e) => {
-          if (!menu || !matches.length) return;
-          if (e.key === "Enter") {
-            e.preventDefault();
-            apply(matches[0]);
+          if (menu && matches.length) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              apply(matches[0]);
+              return;
+            }
+            if (e.key === "Escape") {
+              setMenu(null);
+              return;
+            }
           }
-          if (e.key === "Escape") setMenu(null);
+          if (e.key === "Enter" && !e.shiftKey) continueBlock(e);
         }}
         onBlur={() => setTimeout(() => setMenu(null), 150)}
       />
