@@ -112,21 +112,14 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
       <Grip />
       <Dots id={id} />
       {selected ? (
-        <>
-          <MdArea
-            className="sy-note-text"
-            value={data.text}
-            placeholder={"jot here…  /  for blocks"}
-            focusOnMount
-            onSpawnTable={spawnTableNear(id)}
-            onChange={(v) => updateNodeData(id, { text: v })}
-          />
-          {data.text.trim() && (
-            <div className="sy-live nodrag">
-              <MdView md={data.text} />
-            </div>
-          )}
-        </>
+        <MdArea
+          className="sy-note-text"
+          value={data.text}
+          placeholder={"jot here…  /  for blocks"}
+          focusOnMount
+          onSpawnTable={spawnTableNear(id)}
+          onChange={(v) => updateNodeData(id, { text: v })}
+        />
       ) : (
         <MdView md={data.text} className="sy-note-text" />
       )}
@@ -142,21 +135,14 @@ export function TextNode({ id, data, selected }: NodeProps<Node<NoteData, "text"
       <Grip />
       <Dots id={id} />
       {selected ? (
-        <>
-          <MdArea
-            className="sy-text-area"
-            value={data.text}
-            placeholder={"write…  /  for blocks"}
-            focusOnMount
-            onSpawnTable={spawnTableNear(id)}
-            onChange={(v) => updateNodeData(id, { text: v })}
-          />
-          {data.text.trim() && (
-            <div className="sy-live nodrag">
-              <MdView md={data.text} />
-            </div>
-          )}
-        </>
+        <MdArea
+          className="sy-text-area"
+          value={data.text}
+          placeholder={"write…  /  for blocks"}
+          focusOnMount
+          onSpawnTable={spawnTableNear(id)}
+          onChange={(v) => updateNodeData(id, { text: v })}
+        />
       ) : (
         <MdView md={data.text} className="sy-text-area" />
       )}
