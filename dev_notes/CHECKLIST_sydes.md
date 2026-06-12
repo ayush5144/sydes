@@ -39,34 +39,34 @@
       text get editor + live preview split, tables get a big editable grid
 - [x] Search bar (top-right): searches every node, jump-to + select
 - [x] MiniMap (pannable/zoomable) for canvas navigation
+- [x] Text node: plain markdown on the canvas, no card; exports verbatim
+      in canvas top-to-bottom order
+- [x] Tables minimize/expand (▾ chevron → "n rows · m cols" chip)
+- [x] Enter continues lists/todos/quotes in the editor; empty item exits
+- [x] Drag grip (⠿) in every card's top-left corner
+- [x] Right-click node → disconnect (removes all its connections)
+- [x] Dot menu: right-click a connection dot → connect (click a target)
+      · disconnect — nothing else
+- [x] Move mode: right-click → move, card follows cursor, click places
+- [x] Fresh tray: empty + unconnected components collected top-right;
+      click jumps, drag places
+- [x] No-overlap spawning: new components ring-search for a free spot
+- [x] All textareas auto-grow (no inner scrolling); new components spawn
+      selected + focused
+- [x] MIT LICENSE; Vercel-ready (static, zero config)
 
-## Phase 1 — pages & blocks (the notes direction)
+Direction note: the md-first / pages-and-blocks experiment (block document
+editor) was tried and rolled back — sydes stays a canvas studio that exports
+markdown. The attempt remains in git history if pieces are ever wanted.
 
-sydes = canvases AND pages. A doc is either a canvas (diagram) or a page
-(Notion-style notes). Every canvas node can also open its own page.
+## Next (open, unordered — pick when needed)
 
-- [ ] Page doc type: full-width block editor (new → canvas | page)
-- [ ] Block editor, markdown under the hood — no heavy editor framework:
-      paragraph · h1/h2/h3 · bullet/numbered · todo · code block (with
-      language) · quote · divider · simple table
-- [ ] Slash commands (`/code`, `/h2`, `/todo`, …) to insert blocks
-- [ ] Node pages: open any box/note/table into its page (side panel);
-      export as `### <node>` sections under the diagram
-- [ ] Page export = clean md; canvas export unchanged
-
-## Phase 2 — speed & flow
-
-- [ ] Live md split view in the studio (the doc writes itself as you edit)
-- [ ] ⌘K palette: commands + search across all docs/pages
+- [ ] Undo/redo, Cmd+D duplicate
 - [ ] Tidy button: snap boxes into clean rows/columns
 - [ ] Templates on new canvas (layered app · pipeline · data model · blank)
-- [ ] Undo/redo, Cmd+D duplicate
-
-## Phase 3 — files
-
-- [ ] Save-to-folder (File System Access API): write the exported md
-      straight into a repo's dev_notes/
-- [ ] Export whole workspace as a zip of md files
+- [ ] ⌘K palette: commands + search across files
+- [ ] Save-to-folder (File System Access API) → write md into a repo's
+      dev_notes/; zip export of all files
 
 ## Deferred (only if it earns it)
 
