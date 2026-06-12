@@ -258,7 +258,7 @@ function StudioInner() {
         </ReactFlow>
         {dragging && (
           <div ref={trashRef} className={`sy-trash ${overTrash ? "sy-trash-hot" : ""}`}>
-            ⌫ drop here to delete
+            ⌫ delete
           </div>
         )}
       </div>

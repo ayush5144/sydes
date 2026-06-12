@@ -29,7 +29,7 @@ export function Palette({ onAdd }: { onAdd: (kind: NodeKind) => void }) {
         </button>
       ))}
       <div className="sy-palette-tip">
-        drag in · <kbd>tab</kbd> extends · drag down to delete
+        drag in · <kbd>tab</kbd> extends · <kbd>⌫</kbd> deletes
       </div>
     </aside>
   );

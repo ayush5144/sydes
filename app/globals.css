@@ -559,8 +559,7 @@ kbd {
 .sy-trash {
   position: absolute;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 20px;
   z-index: 10;
   background: var(--card);
   border: 1.5px dashed var(--wire);
@@ -575,7 +574,7 @@ kbd {
   border-color: var(--accent);
   color: var(--accent);
   background: #fbe9e3;
-  transform: translateX(-50%) scale(1.06);
+  transform: scale(1.06);
 }
 
 /* ============ edge labels ============ */
