@@ -19,7 +19,7 @@ const ITEMS: SlashItem[] = [
  * The markdown editor used on every text surface. Keeps its own local value
  * so the caret never jumps while node data round-trips through React Flow
  * (the async update used to reset the cursor to the end of the textarea).
- * Slash commands insert blocks; /table can spawn a real table component.
+ * Slash commands insert markdown blocks in place.
  */
 export function MdArea({
   value,
@@ -30,7 +30,6 @@ export function MdArea({
   autoFocusIfEmpty = false,
   focusOnMount = false,
   slash = true,
-  onSpawnTable,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -40,7 +39,6 @@ export function MdArea({
   autoFocusIfEmpty?: boolean;
   focusOnMount?: boolean;
   slash?: boolean;
-  onSpawnTable?: () => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const [local, setLocal] = useState(value);
@@ -116,13 +114,6 @@ export function MdArea({
 
   const apply = (item: SlashItem) => {
     if (!menu) return;
-    // /table spawns a real table component when the surface supports it
-    if (item.key === "table" && onSpawnTable) {
-      emit(local.slice(0, menu.lineStart) + local.slice(menu.pos));
-      setMenu(null);
-      onSpawnTable();
-      return;
-    }
     const next = local.slice(0, menu.lineStart) + item.insert + local.slice(menu.pos);
     emit(next);
     setMenu(null);
@@ -188,7 +179,7 @@ export function MdArea({
           {matches.map((i, idx) => (
             <button key={i.key} onMouseDown={(e) => { e.preventDefault(); apply(i); }}>
               <span className="sy-slash-key">/{i.key}</span>
-              {i.key === "table" && onSpawnTable ? "table component" : i.name}
+              {i.name}
               {idx === 0 && <kbd>↵</kbd>}
             </button>
           ))}
