@@ -38,12 +38,14 @@ export function WireEdge({
     );
     setEditing(false);
   };
+  const remove = () => setEdges((es) => es.filter((e) => e.id !== id));
   return (
     <>
       <BaseEdge
         id={id}
         path={path}
         markerEnd={markerEnd}
+        interactionWidth={28}
         style={{ stroke: selected ? "var(--accent)" : "var(--wire)", strokeWidth: 1.4 }}
       />
       <EdgeLabelRenderer>
@@ -63,9 +65,21 @@ export function WireEdge({
               }}
             />
           ) : label ? (
-            <span className={selected ? "sy-sel" : ""}>{label as string}</span>
+            <span className={selected ? "sy-sel" : ""}>
+              {label as string}
+              {selected && (
+                <button className="sy-edge-x" title="disconnect" onClick={remove}>
+                  ✕
+                </button>
+              )}
+            </span>
           ) : selected ? (
-            <button onClick={() => setEditing(true)}>+ label</button>
+            <span className="sy-edge-tools">
+              <button onClick={() => setEditing(true)}>+ label</button>
+              <button className="sy-edge-x" title="disconnect" onClick={remove}>
+                ✕
+              </button>
+            </span>
           ) : null}
         </div>
       </EdgeLabelRenderer>

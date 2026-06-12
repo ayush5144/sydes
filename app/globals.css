@@ -538,6 +538,19 @@ kbd {
   border-color: var(--accent);
   transform: scale(1.25);
 }
+/* invisible padding: grab zone is much bigger than the visible square */
+.react-flow__handle::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+
+/* edge reconnect anchors */
+.react-flow__edgeupdater {
+  r: 12;
+  stroke: transparent;
+  fill: transparent;
+}
 
 .react-flow__node {
   font-family: var(--font-geist-mono), monospace;
@@ -616,6 +629,24 @@ kbd {
   border-radius: 3px;
   padding: 1px 6px;
   outline: none;
+}
+.sy-edge-tools {
+  display: inline-flex;
+  gap: 4px;
+}
+.sy-edge-x {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: var(--muted);
+  font-size: 10px;
+  margin-left: 4px;
+}
+.sy-edge-x:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 /* ============ export modal ============ */

@@ -9,6 +9,7 @@ import {
   MarkerType,
   ReactFlow,
   ReactFlowProvider,
+  reconnectEdge,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -38,6 +39,7 @@ const nodeTypes = { box: BoxNode, note: NoteNode, table: TableNode, layer: Layer
 const edgeTypes = { wire: WireEdge };
 const defaultEdgeOptions = {
   type: "wire",
+  reconnectable: true,
   markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#9a9a93" },
 };
 
@@ -56,6 +58,7 @@ function StudioInner() {
   const { screenToFlowPosition, getViewport, addNodes } = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
+  const reconnectOk = useRef(true);
 
   const inTrash = (e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) => {
     const r = trashRef.current?.getBoundingClientRect();
@@ -210,7 +213,17 @@ function StudioInner() {
         onExport={() => setExportMd(toMarkdown(currentDoc()))}
         saved={saved}
       />
-      <div className="sy-body" ref={wrapRef}>
+      <div
+        className="sy-body"
+        ref={wrapRef}
+        onDoubleClickCapture={(e) => {
+          // double-click empty canvas → quick-add a box
+          if ((e.target as HTMLElement).classList.contains("react-flow__pane")) {
+            const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+            addAt("box", { x: pos.x - 90, y: pos.y - 20 });
+          }
+        }}
+      >
         <Palette onAdd={addFromPalette} />
         <ReactFlow
           nodes={nodes}
@@ -223,6 +236,19 @@ function StudioInner() {
           defaultEdgeOptions={defaultEdgeOptions}
           connectionMode={ConnectionMode.Loose}
           connectionRadius={55}
+          zoomOnDoubleClick={false}
+          onReconnectStart={() => {
+            reconnectOk.current = false;
+          }}
+          onReconnect={(oldEdge, conn) => {
+            reconnectOk.current = true;
+            setEdges((es) => reconnectEdge(oldEdge, conn, es));
+          }}
+          onReconnectEnd={(_e, edge) => {
+            // dropped on empty canvas → disconnect
+            if (!reconnectOk.current) setEdges((es) => es.filter((e) => e.id !== edge.id));
+            reconnectOk.current = true;
+          }}
           onNodeDragStart={() => setDragging(true)}
           onNodeDrag={(e) => setOverTrash(inTrash(e))}
           onNodeDragStop={(e, _node, draggedNodes) => {
