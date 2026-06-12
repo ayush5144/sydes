@@ -16,9 +16,10 @@ const ITEMS: SlashItem[] = [
 ];
 
 /**
- * A markdown textarea that auto-grows (never scrolls) with notion-style
- * slash commands: type "/" at the start of a line to insert a block.
- * One editing experience for notes, text sections, table notes, box lines.
+ * The markdown editor used on every text surface. Keeps its own local value
+ * so the caret never jumps while node data round-trips through React Flow
+ * (the async update used to reset the cursor to the end of the textarea).
+ * Slash commands insert blocks; /table can spawn a real table component.
  */
 export function MdArea({
   value,
@@ -29,6 +30,7 @@ export function MdArea({
   autoFocusIfEmpty = false,
   focusOnMount = false,
   slash = true,
+  onSpawnTable,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -38,11 +40,28 @@ export function MdArea({
   autoFocusIfEmpty?: boolean;
   focusOnMount?: boolean;
   slash?: boolean;
+  onSpawnTable?: () => void;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  const [local, setLocal] = useState(value);
+  const lastSent = useRef(value);
   const [menu, setMenu] = useState<{ query: string; lineStart: number; pos: number } | null>(
     null
   );
+
+  // adopt edits that came from elsewhere (e.g. the expand modal on the same node)
+  useEffect(() => {
+    if (value !== lastSent.current) {
+      lastSent.current = value;
+      setLocal(value);
+    }
+  }, [value]);
+
+  const emit = (v: string) => {
+    lastSent.current = v;
+    setLocal(v);
+    onChange(v);
+  };
 
   // grow to fit content — content must never scroll inside a node
   useEffect(() => {
@@ -51,7 +70,7 @@ export function MdArea({
       el.style.height = "auto";
       el.style.height = `${el.scrollHeight}px`;
     }
-  }, [value]);
+  }, [local]);
 
   // a freshly created empty node should be ready to type into;
   // focusOnMount also restores the caret when switching view → edit
@@ -61,7 +80,7 @@ export function MdArea({
     if (focusOnMount) {
       el.focus();
       el.setSelectionRange(el.value.length, el.value.length);
-    } else if (autoFocusIfEmpty && !value) {
+    } else if (autoFocusIfEmpty && !local) {
       el.focus();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,8 +116,15 @@ export function MdArea({
 
   const apply = (item: SlashItem) => {
     if (!menu) return;
-    const next = value.slice(0, menu.lineStart) + item.insert + value.slice(menu.pos);
-    onChange(next);
+    // /table spawns a real table component when the surface supports it
+    if (item.key === "table" && onSpawnTable) {
+      emit(local.slice(0, menu.lineStart) + local.slice(menu.pos));
+      setMenu(null);
+      onSpawnTable();
+      return;
+    }
+    const next = local.slice(0, menu.lineStart) + item.insert + local.slice(menu.pos);
+    emit(next);
     setMenu(null);
     setCaret(menu.lineStart + (item.caret ?? item.insert.length));
   };
@@ -108,22 +134,22 @@ export function MdArea({
     const el = ref.current;
     if (!el || el.selectionStart !== el.selectionEnd) return false;
     const pos = el.selectionStart;
-    const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
-    const line = value.slice(lineStart, pos);
+    const lineStart = local.lastIndexOf("\n", pos - 1) + 1;
+    const line = local.slice(lineStart, pos);
     const m = line.match(/^(\s*)([-*] \[[ xX]\] |[-*] |> |(\d+)\. )/);
     if (!m) return false;
     e.preventDefault();
     const content = line.slice(m[0].length);
     if (!content.trim()) {
       // empty item → drop the marker, exit the list
-      onChange(value.slice(0, lineStart) + value.slice(pos));
+      emit(local.slice(0, lineStart) + local.slice(pos));
       setCaret(lineStart);
       return true;
     }
     let prefix = m[1] + m[2];
     if (m[3]) prefix = `${m[1]}${parseInt(m[3], 10) + 1}. `;
     prefix = prefix.replace(/\[[xX]\]/, "[ ]"); // next todo starts unchecked
-    onChange(value.slice(0, pos) + "\n" + prefix + value.slice(pos));
+    emit(local.slice(0, pos) + "\n" + prefix + local.slice(pos));
     setCaret(pos + 1 + prefix.length);
     return true;
   };
@@ -133,12 +159,12 @@ export function MdArea({
       <textarea
         ref={ref}
         className={`nodrag ${className ?? ""}`}
-        value={value}
+        value={local}
         placeholder={placeholder}
         spellCheck={false}
         rows={minRows}
         onChange={(e) => {
-          onChange(e.target.value);
+          emit(e.target.value);
           detect(e.target.value);
         }}
         onKeyDown={(e) => {
@@ -162,7 +188,7 @@ export function MdArea({
           {matches.map((i, idx) => (
             <button key={i.key} onMouseDown={(e) => { e.preventDefault(); apply(i); }}>
               <span className="sy-slash-key">/{i.key}</span>
-              {i.name}
+              {i.key === "table" && onSpawnTable ? "table component" : i.name}
               {idx === 0 && <kbd>↵</kbd>}
             </button>
           ))}

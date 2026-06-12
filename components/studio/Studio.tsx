@@ -320,6 +320,20 @@ function StudioInner() {
     return () => window.removeEventListener("sydes-node-menu", onNodeMenu);
   }, [nodes, edges]);
 
+  // /table in a note/text spawns a real table component beside that node
+  useEffect(() => {
+    const onSpawn = (ev: Event) => {
+      const { nearId } = (ev as CustomEvent<{ nearId: string }>).detail;
+      const n = nodes.find((x) => x.id === nearId);
+      const base = n
+        ? { x: n.position.x + (n.measured?.width ?? 240) + 60, y: n.position.y }
+        : { x: 240, y: 160 };
+      addAt("table", base);
+    };
+    window.addEventListener("sydes-spawn-table", onSpawn);
+    return () => window.removeEventListener("sydes-spawn-table", onSpawn);
+  }, [nodes, addAt]);
+
   // connect mode: pick a target node by clicking it
   useEffect(() => {
     if (!connectFrom) return;

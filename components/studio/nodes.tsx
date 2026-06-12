@@ -44,6 +44,10 @@ function Grip() {
   );
 }
 
+/* /table in a note/text spawns a real table component next to this node */
+const spawnTableNear = (nearId: string) => () =>
+  window.dispatchEvent(new CustomEvent("sydes-spawn-table", { detail: { nearId } }));
+
 function Dots({ id }: { id: string }) {
   const open = useContext(ExpandContext);
   return (
@@ -103,13 +107,21 @@ export function NoteNode({ id, data, selected }: NodeProps<Node<NoteData, "note"
       <Grip />
       <Dots id={id} />
       {selected ? (
-        <MdArea
-          className="sy-note-text"
-          value={data.text}
-          placeholder={"jot here…  /  for blocks"}
-          focusOnMount
-          onChange={(v) => updateNodeData(id, { text: v })}
-        />
+        <>
+          <MdArea
+            className="sy-note-text"
+            value={data.text}
+            placeholder={"jot here…  /  for blocks"}
+            focusOnMount
+            onSpawnTable={spawnTableNear(id)}
+            onChange={(v) => updateNodeData(id, { text: v })}
+          />
+          {data.text.trim() && (
+            <div className="sy-live nodrag">
+              <MdView md={data.text} />
+            </div>
+          )}
+        </>
       ) : (
         <MdView md={data.text} className="sy-note-text" />
       )}
@@ -125,13 +137,21 @@ export function TextNode({ id, data, selected }: NodeProps<Node<NoteData, "text"
       <Grip />
       <Dots id={id} />
       {selected ? (
-        <MdArea
-          className="sy-text-area"
-          value={data.text}
-          placeholder={"write…  /  for blocks"}
-          focusOnMount
-          onChange={(v) => updateNodeData(id, { text: v })}
-        />
+        <>
+          <MdArea
+            className="sy-text-area"
+            value={data.text}
+            placeholder={"write…  /  for blocks"}
+            focusOnMount
+            onSpawnTable={spawnTableNear(id)}
+            onChange={(v) => updateNodeData(id, { text: v })}
+          />
+          {data.text.trim() && (
+            <div className="sy-live nodrag">
+              <MdView md={data.text} />
+            </div>
+          )}
+        </>
       ) : (
         <MdView md={data.text} className="sy-text-area" />
       )}
