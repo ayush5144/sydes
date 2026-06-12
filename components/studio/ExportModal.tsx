@@ -16,6 +16,40 @@ function download(filename: string, content: string, type: string) {
 const slug = (s: string) =>
   s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "diagram";
 
+/** The saved .md = readable markdown + the workspace data in an html
+ *  comment, so the file reads perfectly anywhere and reopens editable. */
+function mdWithData(md: string, file: SydesFile): string {
+  const data = JSON.stringify({
+    name: file.name,
+    direction: file.direction,
+    nodes: file.nodes,
+    edges: file.edges,
+  }).replace(/-->/g, "--\\u003e");
+  return `${md.trimEnd()}\n\n<!-- sydes:canvas ${data} -->\n`;
+}
+
+export function parseMdFile(text: string, fallbackName: string): SydesFile | null {
+  const m = text.match(/<!-- sydes:canvas ([\s\S]*?) -->/);
+  if (m) {
+    try {
+      const data = JSON.parse(m[1]);
+      return {
+        id: "tmp",
+        name: data.name || fallbackName,
+        kind: "canvas",
+        direction: data.direction ?? "v",
+        nodes: data.nodes ?? [],
+        edges: data.edges ?? [],
+        updatedAt: 0,
+      };
+    } catch {
+      return null;
+    }
+  }
+  // plain markdown from anywhere → becomes a text element
+  return { id: "tmp", name: fallbackName, kind: "md", content: text, updatedAt: 0 };
+}
+
 export function ExportModal({
   md,
   file,
@@ -47,7 +81,7 @@ export function ExportModal({
           >
             {copied ? "copied ✓" : "copy markdown"}
           </button>
-          <button onClick={() => download(`${slug(file.name)}.md`, md, "text/markdown")}>
+          <button onClick={() => download(`${slug(file.name)}.md`, mdWithData(md, file), "text/markdown")}>
             download .md
           </button>
           <div className="sy-spacer" />
@@ -60,16 +94,23 @@ export function ExportModal({
             backup .json
           </button>
           <label className="sy-quiet sy-filebtn">
-            import .json
+            import .md / .json
             <input
               type="file"
-              accept="application/json"
+              accept=".md,.json,text/markdown,application/json"
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
                 try {
-                  const parsed = JSON.parse(await f.text()) as SydesFile;
-                  if (parsed && (typeof parsed.content === "string" || Array.isArray(parsed.nodes))) {
+                  const text = await f.text();
+                  let parsed: SydesFile | null = null;
+                  if (f.name.endsWith(".json")) {
+                    const j = JSON.parse(text) as SydesFile;
+                    if (j && (typeof j.content === "string" || Array.isArray(j.nodes))) parsed = j;
+                  } else {
+                    parsed = parseMdFile(text, f.name.replace(/\.md$/, ""));
+                  }
+                  if (parsed) {
                     onImport(parsed);
                     onClose();
                   }

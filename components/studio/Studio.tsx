@@ -20,10 +20,9 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { makeNode, uid, type NodeKind } from "../../lib/factory";
+import { blankDiagram, makeNode, uid, type NodeKind } from "../../lib/factory";
 import { toMarkdown } from "../../lib/export";
 import {
-  blankMdFile,
   deleteDiagram,
   initialDiagram,
   listDiagrams,
@@ -100,10 +99,17 @@ function StudioInner() {
   const openDoc = useCallback(
     (docIn: SydesFile) => {
       let doc = docIn;
-      // md-only: legacy canvas files convert to documents on open.
-      // nodes/edges stay stored on the file as a safety net.
-      if (doc.kind === "canvas") {
-        doc = { ...doc, kind: "md", content: toMarkdown(doc) };
+      // one experience: the unbounded workspace. md is the FORMAT, not the
+      // editor. files that were converted to md get their workspace back
+      // from the stored nodes; pure-md files open as a text element.
+      if (doc.kind === "md") {
+        if (doc.nodes?.length) {
+          doc = { ...doc, kind: "canvas" };
+        } else {
+          const t = makeNode("text", { x: 160, y: 96 });
+          t.data = { text: (doc.content ?? "").trim() || `# ${doc.name}` };
+          doc = { ...doc, kind: "canvas", direction: "v", nodes: [t], edges: [] };
+        }
         saveDiagram(doc);
       }
       setCurrentId(doc.id);
@@ -198,8 +204,7 @@ function StudioInner() {
 
   const newDiagram = () => {
     saveDiagram(currentDoc());
-    // md-first: every new file is a markdown document
-    const doc = blankMdFile();
+    const doc = blankDiagram();
     saveDiagram(doc);
     openDoc(doc);
   };
@@ -212,7 +217,7 @@ function StudioInner() {
       const doc = loadDiagram(rest[0].id);
       if (doc) return openDoc(doc);
     }
-    const doc = blankMdFile();
+    const doc = blankDiagram();
     saveDiagram(doc);
     openDoc(doc);
   };

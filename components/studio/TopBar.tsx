@@ -102,7 +102,7 @@ export function TopBar(props: {
         </div>
       )}
       <button className="sy-export" onClick={props.onExport}>
-        {props.kind === "md" ? "copy / download" : "export md"}
+        copy / download
       </button>
     </header>
   );
