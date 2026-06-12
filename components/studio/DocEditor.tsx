@@ -53,7 +53,7 @@ export function DocEditor({
   };
 
   return (
-    <div className="sy-doc">
+    <div className="sy-page">
       {blocks.map((b, i) => (
         <div
           key={i}
@@ -130,7 +130,7 @@ export function DocEditor({
         </div>
       ) : (
         <button
-          className="sy-doc-add"
+          className="sy-page-add"
           onDragOver={(e) => {
             if (dragIdx === null) return;
             e.preventDefault();
@@ -151,7 +151,7 @@ export function DocEditor({
         </button>
       )}
 
-      <div className="sy-doc-hint">
+      <div className="sy-page-hint">
         click a block to edit · <kbd>/</kbd> for blocks · drag <span className="sy-hint-handle">⋮⋮</span> to
         reorder · empty a block to delete it
       </div>
