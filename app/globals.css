@@ -1226,11 +1226,26 @@ kbd {
   padding: 24px 28px;
   background: var(--paper);
 }
-.sy-expand-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-  align-items: start;
+.sy-expand-rich {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px 20px;
+  min-height: 360px;
+  max-width: 780px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+}
+.sy-expand-rich textarea {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  font: inherit;
+  line-height: 1.6;
 }
 .sy-expand-editor {
   width: 100%;
@@ -1248,16 +1263,6 @@ kbd {
 }
 .sy-expand-editor:focus {
   border-color: var(--wire);
-}
-.sy-expand-preview {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 16px 18px;
-  min-height: 340px;
-}
-.sy-expand-preview .sy-md {
-  font-size: 13px;
 }
 .sy-expand-title {
   display: block;

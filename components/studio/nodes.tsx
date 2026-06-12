@@ -166,9 +166,15 @@ export function TableGrid({
   };
   const addRow = () => updateNodeData(id, { rows: [...rows, rows[0].map(() => "")] });
   const addCol = () => updateNodeData(id, { rows: rows.map((r) => [...r, ""]) });
-  const delRow = () => rows.length > 2 && updateNodeData(id, { rows: rows.slice(0, -1) });
+  // only remove a row/column when it's empty — no accidental data loss
+  const delRow = () =>
+    rows.length > 2 &&
+    rows[rows.length - 1].every((c) => !c.trim()) &&
+    updateNodeData(id, { rows: rows.slice(0, -1) });
   const delCol = () =>
-    rows[0].length > 1 && updateNodeData(id, { rows: rows.map((r) => r.slice(0, -1)) });
+    rows[0].length > 1 &&
+    rows.every((r) => !(r[r.length - 1] ?? "").trim()) &&
+    updateNodeData(id, { rows: rows.map((r) => r.slice(0, -1)) });
   return (
     <>
       <table className={big ? "sy-grid-big" : undefined}>

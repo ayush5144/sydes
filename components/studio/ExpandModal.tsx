@@ -1,10 +1,10 @@
 "use client";
 
 import { useReactFlow, type Node } from "@xyflow/react";
-import { MdView } from "../../lib/markdown";
 import type { BoxData, NoteData, TableData } from "../../lib/types";
 import { MdArea } from "./MdArea";
 import { TableGrid } from "./nodes";
+import { RichMd } from "./RichMd";
 
 const KIND_LABEL: Record<string, string> = {
   box: "box",
@@ -27,18 +27,13 @@ export function ExpandModal({ node, onClose }: { node: Node; onClose: () => void
         </div>
         <div className="sy-expand-body">
           {(node.type === "note" || node.type === "text") && (
-            <div className="sy-expand-split">
-              <MdArea
-                className="sy-expand-editor"
+            <div className="sy-expand-rich">
+              <RichMd
                 value={(node.data as NoteData).text}
                 placeholder={"write…  /  for blocks"}
-                minRows={10}
                 focusOnMount
                 onChange={(v) => updateNodeData(id, { text: v })}
               />
-              <div className="sy-expand-preview">
-                <MdView md={(node.data as NoteData).text} />
-              </div>
             </div>
           )}
           {node.type === "box" && (
