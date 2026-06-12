@@ -25,10 +25,15 @@ function Ports({ nodeId }: { nodeId: string }) {
       })
     );
   };
+  // all handles are type "source": in loose connection mode React Flow only
+  // resolves an edge's sourceHandle among source-type handles, so a drag
+  // started from a target-type dot produced unresolvable edges (error #008,
+  // render-loop console spam, frozen page). Sources can both start and
+  // receive connections in loose mode; ids stay t/l/b/r so saved edges work.
   return (
     <>
-      <Handle type="target" position={Position.Top} id="t" onContextMenu={onMenu} />
-      <Handle type="target" position={Position.Left} id="l" onContextMenu={onMenu} />
+      <Handle type="source" position={Position.Top} id="t" onContextMenu={onMenu} />
+      <Handle type="source" position={Position.Left} id="l" onContextMenu={onMenu} />
       <Handle type="source" position={Position.Bottom} id="b" onContextMenu={onMenu} />
       <Handle type="source" position={Position.Right} id="r" onContextMenu={onMenu} />
     </>
