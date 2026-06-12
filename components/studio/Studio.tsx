@@ -73,6 +73,7 @@ function StudioInner() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [expandId, setExpandId] = useState<string | null>(null);
   const [moveId, setMoveId] = useState<string | null>(null);
+  const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const { screenToFlowPosition, getViewport, addNodes, setCenter } = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);
   const trashRef = useRef<HTMLDivElement>(null);
@@ -136,13 +137,49 @@ function StudioInner() {
     [setEdges]
   );
 
+  // nudge a spawn position outward in rings until it doesn't overlap anything
+  const findFreeSpot = useCallback(
+    (pos: { x: number; y: number }) => {
+      const W = 210, H = 90, GAP = 20;
+      const hits = (x: number, y: number) =>
+        nodes.some((n) => {
+          if (n.type === "layer") return false;
+          const nw = n.measured?.width ?? 200;
+          const nh = n.measured?.height ?? 80;
+          return (
+            x < n.position.x + nw + GAP &&
+            x + W + GAP > n.position.x &&
+            y < n.position.y + nh + GAP &&
+            y + H + GAP > n.position.y
+          );
+        });
+      if (!hits(pos.x, pos.y)) return pos;
+      for (let ring = 1; ring <= 12; ring++) {
+        const d = ring * 60;
+        for (const c of [
+          { x: pos.x + d, y: pos.y },
+          { x: pos.x, y: pos.y + d },
+          { x: pos.x + d, y: pos.y + d },
+          { x: pos.x - d, y: pos.y },
+          { x: pos.x, y: pos.y - d },
+          { x: pos.x - d, y: pos.y + d },
+          { x: pos.x + d, y: pos.y - d },
+          { x: pos.x - d, y: pos.y - d },
+        ])
+          if (!hits(c.x, c.y)) return c;
+      }
+      return pos;
+    },
+    [nodes]
+  );
+
   const addAt = useCallback(
     (kind: NodeKind, pos: { x: number; y: number }) => {
       // select the new node so its editor focuses and typing starts instantly
-      const node = { ...makeNode(kind, pos), selected: true };
+      const node = { ...makeNode(kind, findFreeSpot(pos)), selected: true };
       setNodes((ns) => ns.map((n) => ({ ...n, selected: false })).concat(node));
     },
-    [setNodes]
+    [setNodes, findFreeSpot]
   );
 
   const addFromPalette = useCallback(
@@ -168,10 +205,11 @@ function StudioInner() {
       const src = sel[0];
       const w = src.measured?.width ?? 200;
       const h = src.measured?.height ?? 70;
-      const pos =
+      const pos = findFreeSpot(
         direction === "v"
           ? { x: src.position.x, y: src.position.y + h + 90 }
-          : { x: src.position.x + w + 110, y: src.position.y };
+          : { x: src.position.x + w + 110, y: src.position.y }
+      );
       const node = { ...makeNode("box", pos), selected: true };
       setNodes((ns) => ns.map((n) => ({ ...n, selected: false })).concat(node));
       setEdges((es) =>
@@ -180,7 +218,7 @@ function StudioInner() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [nodes, direction, setNodes, setEdges]);
+  }, [nodes, direction, setNodes, setEdges, findFreeSpot]);
 
   const switchTo = (id: string) => {
     if (id === currentId) return;
@@ -265,16 +303,14 @@ function StudioInner() {
     };
   }, [moveId, screenToFlowPosition, setNodes]);
 
-  // right-clicking a connection dot opens the node menu
+  // right-clicking a connection dot opens the dot menu (connect / disconnect)
   useEffect(() => {
     const onNodeMenu = (ev: Event) => {
       const { id, x, y } = (ev as CustomEvent<{ id: string; x: number; y: number }>).detail;
-      const node = nodes.find((n) => n.id === id);
-      if (!node) return;
+      if (!nodes.some((n) => n.id === id)) return;
       setMenu({
-        kind: "node",
+        kind: "dot",
         id,
-        expandable: EXPANDABLE.has(node.type ?? ""),
         connected: edges.some((ed) => ed.source === id || ed.target === id),
         x,
         y,
@@ -283,6 +319,16 @@ function StudioInner() {
     window.addEventListener("sydes-node-menu", onNodeMenu);
     return () => window.removeEventListener("sydes-node-menu", onNodeMenu);
   }, [nodes, edges]);
+
+  // connect mode: pick a target node by clicking it
+  useEffect(() => {
+    if (!connectFrom) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setConnectFrom(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [connectFrom]);
 
   const jumpTo = (id: string) => {
     const n = nodes.find((x) => x.id === id);
@@ -339,6 +385,18 @@ function StudioInner() {
           connectionMode={ConnectionMode.Loose}
           connectionRadius={55}
           zoomOnDoubleClick={false}
+          onNodeClick={(_e, node) => {
+            if (connectFrom && node.id !== connectFrom) {
+              setEdges((es) =>
+                addEdge(
+                  { id: `e-${uid()}`, source: connectFrom, target: node.id, type: "wire" },
+                  es
+                )
+              );
+              setConnectFrom(null);
+            }
+          }}
+          onPaneClick={() => setConnectFrom(null)}
           onReconnectStart={() => {
             reconnectOk.current = false;
           }}
@@ -431,6 +489,9 @@ function StudioInner() {
           </div>
         )}
         {moveId && <div className="sy-move-hint">moving — click to place · esc cancels</div>}
+        {connectFrom && (
+          <div className="sy-move-hint">connecting — click a target node · esc cancels</div>
+        )}
         {!dragging && (
           <button className="sy-help-btn" onClick={() => setHelpOpen((v) => !v)}>
             ?
@@ -456,6 +517,7 @@ function StudioInner() {
             onClose={() => setMenu(null)}
             onExpand={setExpandId}
             onMove={setMoveId}
+            onStartConnect={setConnectFrom}
             onDuplicate={duplicateNode}
             onDeleteNode={deleteNode}
             onDisconnect={(id) => setEdges((es) => es.filter((e) => e.id !== id))}

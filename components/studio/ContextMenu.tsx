@@ -3,7 +3,7 @@
 import type { NodeKind } from "../../lib/factory";
 
 export type MenuState = {
-  kind: "node" | "edge" | "pane";
+  kind: "node" | "edge" | "pane" | "dot";
   id?: string;
   hasLabel?: boolean;
   expandable?: boolean;
@@ -17,6 +17,7 @@ export function ContextMenu({
   onClose,
   onExpand,
   onMove,
+  onStartConnect,
   onDuplicate,
   onDeleteNode,
   onDisconnect,
@@ -28,6 +29,7 @@ export function ContextMenu({
   onClose: () => void;
   onExpand: (id: string) => void;
   onMove: (id: string) => void;
+  onStartConnect: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDeleteNode: (id: string) => void;
   onDisconnect: (id: string) => void;
@@ -58,6 +60,10 @@ export function ContextMenu({
           item("duplicate", () => onDuplicate(menu.id!)),
           menu.connected ? item("disconnect", () => onDisconnectNode(menu.id!)) : null,
           item("delete", () => onDeleteNode(menu.id!), true),
+        ]}
+        {menu.kind === "dot" && [
+          item("connect — click a node", () => onStartConnect(menu.id!)),
+          menu.connected ? item("disconnect", () => onDisconnectNode(menu.id!), true) : null,
         ]}
         {menu.kind === "edge" && [
           menu.hasLabel ? item("remove label", () => onClearLabel(menu.id!)) : null,
